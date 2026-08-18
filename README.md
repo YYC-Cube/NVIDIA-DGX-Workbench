@@ -33,10 +33,6 @@ nvidia-workbench/
 ├── AI-资源矩阵-统一知识图谱.md  # 数据源文档：900+ 资源分类归档
 ├── NVIDIA-NIM-全量模型-分析报告.md  # 数据源文档：138 款 NIM 模型分析
 ├── NVIDIA-DGX-Spark.md         # DGX Spark 硬件说明文档
-├── YYC3-HTML-设计指导文档.md   # YYC³ HTML 应用统一设计规范
-├── YYC3-Node-运维手册.md       # Node 服务标准化运维手册
-├── YYC3-My管理思维-*.md        # 管理思维转型文档
-├── YYC3-管理思维-智能一体化转型.html  # 管理思维可视化页面
 ├── ngc_health_check.sh         # NGC 环境健康自检脚本
 └── clean-dsstore.sh            # 清理 .DS_Store 辅助脚本
 ```
@@ -274,7 +270,7 @@ var GUIDES = [
 
 ### 代码规范
 
-- 遵循 `YYC3-HTML-设计指导文档.md` 中定义的设计体系（暗色优先、数据驱动、单文件架构）
+- 遵循本项目的设计体系：暗色优先、数据驱动、单文件架构、移动适配
 - JS 字符串一律使用单引号（避免内嵌引号破坏语法）
 - 新增数据时同步维护离线版与在线版
 
