@@ -9,6 +9,7 @@ NVIDIA DGX Spark / GB10 桌面级 AI 超算的**全链路操作指南平台**。
 
 ## 目录
 
+- [系统架构](#系统架构)
 - [项目结构](#项目结构)
 - [功能特性](#功能特性)
 - [快速开始](#快速开始)
@@ -18,6 +19,105 @@ NVIDIA DGX Spark / GB10 桌面级 AI 超算的**全链路操作指南平台**。
 - [数据维护指南](#数据维护指南)
 - [开发者指南](#开发者指南)
 - [许可证](#许可证)
+
+---
+
+## 系统架构
+
+### 1. 全链路架构总览
+
+```
+                ┌─────────────────────────────────────────────────────────┐
+                │              nvidia-workbench.yyc3.vip                  │
+                │              DGX Spark 操作中心 · YYC³                   │
+                └──────────────────────────┬──────────────────────────────┘
+                                           │ HTTPS (HTTP/2 · TLS 1.3)
+                                           ▼
+                ┌─────────────────────────────────────────────────────────┐
+                │                    表现层 (Presentation)                │
+                │   ┌─────────────┐  ┌─────────────┐  ┌─────────────┐     │
+                │   │ 侧边栏导航    │  │ 仪表盘卡片   │  │ 指南详情页   │     │
+                │   │ Search/Sync │  │ Filter/Cat  │  │ Step/Toggle  │     │
+                │   └─────────────┘  └─────────────┘  └─────────────┘     │
+                ├─────────────────────────────────────────────────────────┤
+                │                    数据层 (Data)                        │
+                │   ┌───────────────────────────────────────────────┐     │
+                │   │  GUIDES 206 条 │ SKILLS 105 条 │ 分类 16 大    │     │
+                │   │  步骤 218 步   │ 外链 157 条  │ 徽章/主题      │     │
+                │   └───────────────────────────────────────────────┘     │
+                ├─────────────────────────────────────────────────────────┤
+                │                    存储层 (Storage)                     │
+                │   ┌─────────────┐  ┌─────────────┐  ┌─────────────┐     │
+                │   │ localStorage │  │ Hash Route  │  │ localStorage │    │
+                │   │ 进度持久化   │  │ 深链导航     │  │ 主题记忆     │    │
+                │   └─────────────┘  └─────────────┘  └─────────────┘     │
+                └─────────────────────────────────────────────────────────┘
+```
+
+### 2. 数据流示意
+
+```
+┌──────────┐   DOMContentLoaded   ┌──────────┐   render    ┌──────────┐
+│  init()  │ ───────────────────▶ │ buildSide│ ──────────▶ │ 侧边栏/卡片 │
+└──────────┘                      └──────────┘             └──────────┘
+      │                                │                        │
+      │ setInterval(1s)                │ filterByCategory       │ click
+      ▼                                ▼                        ▼
+┌──────────┐                      ┌──────────┐            ┌──────────┐
+│ 时钟组件  │                      │ applyFilter│           │ showGuide│
+└──────────┘                      └──────────┘            └────┬─────┘
+      ▲                                                     │ steps
+      │                                                    ▼
+┌──────────┐     localStorage       ┌──────────┐      ┌──────────────┐
+│ toggleDone│◀─────────────────────▶│ 进度键值   │◀──── │ toggleStep   │
+└──────────┘  guide-done-{id}      └──────────┘      │ step-done-{n}│
+                                                    └──────────────┘
+```
+
+### 3. 部署与 CI/CD 流水线
+
+```
+┌──────────┐  git push  ┌───────────────┐  trigger  ┌──────────────────┐
+│ 本地代码库 │ ─────────▶│ GitHub 远程仓库 │ ────────▶ │ GitHub Actions   │
+└──────────┘            │ YYC-Cube/     │           │ pages-deploy.yml │
+                        │ NVIDIA-DGX-   │           └────────┬─────────┘
+                        │ Workbench     │                    │
+                        └───────────────┘                    │
+                        ┌────────────────────────────────────▼──────────┐
+                        │ ① actions/checkout → ② configure-pages       │
+                        │ ③ upload-pages-artifact → ④ deploy-pages     │
+                        └────────────────────────────────────┬──────────┘
+                                                             │
+                                             ┌───────────────▼───────────────┐
+                                             │  GitHub Pages CDN · HTTPS     │
+                                             │  https://nvidia-workbench.yyc3.vip│
+                                             └───────────────────────────────┘
+```
+
+### 4. 内容分类架构（16 大主分类）
+
+```
+                     ┌──────────────────────────┐
+                     │    DGX Spark 操作中心     │
+                     │   206 指南 · 218 步骤    │
+                     └────────────┬─────────────┘
+        ┌────────────┬────────────┼────────────┬──────────────┐
+        ▼            ▼            ▼            ▼              ▼
+┌─────────────┐ ┌──────────┐ ┌──────────┐ ┌──────────┐ ┌────────────┐
+│ 🚀 入门配置  │ │ ⚡ 推理引擎│ │ 🎯 模型微调│ │ 🔗 集群互联│ │ 📉 模型量化 │
+│  1 篇        │ │  9 篇     │ │  6 篇     │ │  5 篇     │ │  1 篇       │
+└─────────────┘ └──────────┘ └──────────┘ └──────────┘ └────────────┘
+┌────────────┐ ┌──────────┐ ┌──────────┐ ┌──────────┐ ┌────────────┐
+│ 🤖 AI 应用  │ │ 📊 数据科学│ │ 🛠️ 开发工具│ │ 🛡️ 安全沙箱│ │ 📦 GitHub  │
+│  11 篇      │ │  4 篇     │ │  7 篇     │ │  1 篇     │ │ 仓库 17 篇  │
+└────────────┘ └──────────┘ └──────────┘ └──────────┘ └────────────┘
+┌────────────┐ ┌──────────┐ ┌──────────────┐ ┌──────────┐ ┌──────────┐
+│ 📘 NVIDIA   │ │ 🔶 中期   │ │ 🗺️ 资源矩阵   │ │ 🧠 NIM    │ │ 🔧 YYC3   │
+│ 官方资源 131 │ │ 可选 9 篇 │ │  8 篇         │ │ 模型 12   │ │ 运维 4 篇 │
+└────────────┘ └──────────┘ └──────────────┘ └──────────┘ └──────────┘
+```
+
+> 另有 21 类 NVIDIA Skills 技能子分类（RAG / Megatron / cuOpt / Holoscan / TAO 等 105 条技能），通过 `npx skills add` 一键安装。
 
 ---
 
@@ -49,8 +149,20 @@ nvidia-workbench/
 
 ## 功能特性
 
-- 🗂️ **9 大核心领域**：入门配置、推理引擎、模型微调、集群互联、模型量化、AI 应用、数据科学、开发工具、安全沙箱
-- 📦 **NVIDIA 官方资源**：GitHub 仓库、官方文档、AI Workbench 参考
+### 内容规模（对齐线上站点）
+
+| 统计项 | 数量 |
+| -------- | ------ |
+| 操作指南 | **206 篇**（含 157 个外部资源） |
+| 操作步骤 | **218 步** |
+| NVIDIA Skills 技能 | **105 条**（21 大技能领域） |
+| 主分类 | **16 大** |
+| 内容来源 | AI 资源矩阵（900+ 资源）+ NIM 模型库（138 款） |
+
+### 核心功能
+
+- 🗂️ **16 大分类导航**：入门配置、推理引擎、模型微调、集群互联、模型量化、AI 应用、数据科学、开发工具、安全沙箱 + NVIDIA 官方资源等
+- 📦 **NVIDIA 官方资源**：GitHub 仓库（17）、官方文档（131）、AI Workbench 参考
 - 🧠 **NIM 模型库**：138 款模型按 10 大类别全量归档
 - 🗺️ **AI 资源矩阵**：900+ 资源统一知识图谱
 - ✅ **进度追踪**：指南/步骤两级完成状态，localStorage 持久化
@@ -108,6 +220,8 @@ npx serve .
 
 ## GitHub Pages 部署
 
+> **当前部署模式**：GitHub Actions workflow（`build_type: workflow`），见 [.github/workflows/pages-deploy.yml](.github/workflows/pages-deploy.yml)
+
 ### 1. 初始化仓库并推送
 
 ```bash
@@ -119,17 +233,49 @@ git remote add origin https://github.com/YYC-Cube/NVIDIA-DGX-Workbench.git
 git push -u origin main
 ```
 
-### 2. 配置 GitHub Pages
+### 2. 创建 Pages 部署 Workflow
+
+Pages 设置为 **GitHub Actions** 模式时，必须存在部署流水线文件，否则站点不会构建（返回 404）。仓库已内置 [pages-deploy.yml](.github/workflows/pages-deploy.yml)：
+
+```yaml
+on:
+  push:
+    branches: [main]   # push main 自动触发
+  workflow_dispatch:    # 支持手动触发
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+jobs:
+  deploy:
+    environment: github-pages
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/configure-pages@v5
+      - uses: actions/upload-pages-artifact@v3
+        with: { path: '.' }          # 发布仓库根目录
+      - uses: actions/deploy-pages@v4
+```
+
+### 3. 配置 GitHub Pages
 
 1. 进入仓库 **Settings → Pages**
-2. Source 选择 **Deploy from a branch**
-3. Branch 选择 **main**，目录选择 **/ (root)**
-4. 保存后等待构建（约 1 分钟）
+2. Source 选择 **GitHub Actions**（Build and deployment → Source）
+3. 首次 `git push main` 后自动触发 Actions 构建
 
-### 3. 验证部署
+### 4. 验证部署
+
+```bash
+gh run list --repo YYC-Cube/NVIDIA-DGX-Workbench   # 查看构建状态
+curl -I https://nvidia-workbench.yyc3.vip          # 期望 HTTP/2 200
+```
 
 - 默认地址：`https://YYC-Cube.github.io/NVIDIA-DGX-Workbench/`
 - 站点根入口为 `index.html`，无需额外路由配置
+- **每次 `git push main` 均自动重新构建发布**
 
 ---
 
@@ -158,11 +304,18 @@ nvidia-workbench.yyc3.vip
 ### 3. 生效验证
 
 ```bash
-dig nvidia-workbench.yyc3.vip
-curl -I https://nvidia-workbench.yyc3.vip
+dig nvidia-workbench.yyc3.vip            # CNAME → YYC-Cube.github.io
+curl -I https://nvidia-workbench.yyc3.vip  # 期望 HTTP/2 200
 ```
 
-DNS 解析生效一般需 5~30 分钟。
+### 4. 当前线上状态
+
+| 检查项 | 状态 |
+| -------- | ------ |
+| DNS CNAME → `yyc-cube.github.io` | ✅ 已验证 |
+| HTTPS 证书（Let's Encrypt） | ✅ 已签发（有效期至 2026-11-16） |
+| HTTPS 强制跳转 | ✅ 已开启（`https_enforced: true`） |
+| 域名所有权 | ✅ 已确认（`protected_domain_state: verified`） |
 
 ---
 
@@ -170,7 +323,9 @@ DNS 解析生效一般需 5~30 分钟。
 
 ### 数据文件结构
 
-**在线版数据**（`DGX-SPARK-DATA.js`）：
+**线上部署数据**（`index.html` 内联）：线上站点渲染的是 `index.html` 中的内联 `GUIDES` 数组（206 条指南 + 105 条技能 + 157 外部链接），数据与 `DGX-SPARK-HUB-OFFLINE.html` 一致。
+
+**在线版数据**（`DGX-SPARK-DATA.js`，知识图谱子集 24 条）：
 
 ```js
 var GUIDES = [
@@ -208,9 +363,12 @@ var GUIDES = [
 
 ### 新增一条指南
 
+> ⚠️ **线上对齐原则**：`index.html` 是 GitHub Pages 的唯一部署入口，新增/修改数据**必须**同步更新 `index.html` 与 `DGX-SPARK-HUB-OFFLINE.html`，并 `git push main` 触发自动构建。
+
 1. 在 `GUIDES` 数组中追加对象，保证 `id` 唯一、`order` 不重复
 2. 分类 key 需在 `getCategoryLabels()` / `getCategoryColors()` 中注册（若为新分类）
-3. 离线版与在线版需**同步维护**数据
+3. 修改后同步执行 `cp DGX-SPARK-HUB-OFFLINE.html index.html` 确保部署版本一致
+4. 提交并推送：`git push` 自动触发 Actions 重新构建（约 1 分钟）
 
 ### 分类注册表
 
@@ -272,15 +430,18 @@ var GUIDES = [
 
 - 遵循本项目的设计体系：暗色优先、数据驱动、单文件架构、移动适配
 - JS 字符串一律使用单引号（避免内嵌引号破坏语法）
-- 新增数据时同步维护离线版与在线版
+- 数据变更后同步更新 `index.html`（部署入口）与 `DGX-SPARK-HUB-OFFLINE.html`（归档源）
 
 ### 常见问题（FAQ）
 
 **Q: 为什么需要 index.html 和 OFFLINE 版两个文件？**
-A: `index.html` 是 GitHub Pages 的默认入口文件，`DGX-SPARK-HUB-OFFLINE.html` 是带独立命名的离线归档源文件，两者内容一致。
+A: `index.html` 是 GitHub Pages 的默认入口文件（线上渲染唯一来源），`DGX-SPARK-HUB-OFFLINE.html` 是带独立命名的离线归档源文件，两者内容一致，更新时需同步。
 
 **Q: 修改数据后线上不生效？**
-A: 确认修改的是仓库 `main` 分支根目录的 `index.html`，并等待 GitHub Pages 重新构建（约 1 分钟）。
+A: 确认修改的是仓库 `main` 分支根目录的 `index.html`，然后 `git push` 触发 GitHub Actions workflow 自动重新构建（约 1 分钟）。可用 `gh run list --repo YYC-Cube/NVIDIA-DGX-Workbench` 查看构建状态。
+
+**Q: 为什么在线版（DGX-SPARK-HUB.html）数据比线上少？**
+A: `DGX-SPARK-DATA.js` 仅含 AI 资源矩阵知识图谱子集（24 条），而 `index.html` 部署的是全量离线版（206 条指南 + 105 技能）。线上以 `index.html` 为准。
 
 **Q: 浏览器控制台报 `var(--mono)` 未定义？**
 A: 该错误已修复，统一使用 `var(--font-mono)`。如遇自定义样式，请检查 CSS 变量名拼写。
@@ -289,6 +450,6 @@ A: 该错误已修复，统一使用 `var(--font-mono)`。如遇自定义样式�
 
 ## 许可证
 
-© 2025 YYC³ (YanYuCloudCube™) · NVIDIA DGX Workbench 操作中心
+© 2025-2026 YYC³ (YanYuCloudCube™) · NVIDIA DGX Workbench 操作中心
 
 本项目的站点代码与内容归 YYC³ 所有。涉及的 NVIDIA 品牌、模型名称与第三方链接版权归其各自所有者。示例代码仅供学习参考，生产环境请遵循官方文档与安全规范。
