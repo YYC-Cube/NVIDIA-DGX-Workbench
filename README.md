@@ -18,6 +18,7 @@ NVIDIA DGX Spark / GB10 桌面级 AI 超算的**全链路操作指南平台**。
 - [自定义域名绑定](#自定义域名绑定)
 - [数据维护指南](#数据维护指南)
 - [开发者指南](#开发者指南)
+- [文档体系](#文档体系)
 - [许可证](#许可证)
 
 ---
@@ -129,13 +130,19 @@ nvidia-workbench/
 ├── DGX-SPARK-HUB-OFFLINE.html  # 离线版源文件（零依赖，可直接双击运行）
 ├── DGX-SPARK-HUB.html          # 在线版（引用 DGX-SPARK-DATA.js 分离数据）
 ├── DGX-SPARK-DATA.js           # 数据文件（GUIDES 指南 + SKILLS 技能）
-├── README.md                   # 开发者文档（本文件）
+├── README.md                   # 项目总览与开发者文档（本文件）
+├── CONTRIBUTING.md             # 贡献指南：开发流程 / 数据规范 / 提交与 PR 规范
+├── CHANGELOG.md                # 变更日志（Keep a Changelog 格式）
+├── SECURITY.md                 # 安全策略：漏洞报告渠道与内容红线
+├── LICENSE                     # 版权声明（保留所有权利）
+├── .editorconfig               # 编辑器基础规范（UTF-8 / LF / 2 空格缩进）
 ├── AI-资源矩阵-统一知识图谱.md  # 数据源文档：900+ 资源分类归档
 ├── NVIDIA-NIM-全量模型-分析报告.md  # 数据源文档：138 款 NIM 模型分析
 ├── NVIDIA-DGX-Spark.md         # DGX Spark 硬件说明文档
-├── ngc_health_check.sh         # NGC 环境健康自检脚本
-└── clean-dsstore.sh            # 清理 .DS_Store 辅助脚本
+└── .github/workflows/pages-deploy.yml  # CI：push main 自动部署 GitHub Pages
 ```
+
+> 仓库只保留与站点相关的文件；本地运维脚本、IDE 配置等无关内容由 [.gitignore](.gitignore) 排除，不入库、不发布。
 
 ### 部署文件说明
 
@@ -395,6 +402,8 @@ var GUIDES = [
 
 ## 开发者指南
 
+> 完整开发流程、数据维护规范、代码规范与提交 / PR 规范见 [CONTRIBUTING.md](CONTRIBUTING.md)；版本历史见 [CHANGELOG.md](CHANGELOG.md)。
+
 ### 常见开发任务
 
 #### 1. 修改主题色
@@ -431,6 +440,8 @@ var GUIDES = [
 - 遵循本项目的设计体系：暗色优先、数据驱动、单文件架构、移动适配
 - JS 字符串一律使用单引号（避免内嵌引号破坏语法）
 - 数据变更后同步更新 `index.html`（部署入口）与 `DGX-SPARK-HUB-OFFLINE.html`（归档源）
+- 提交信息遵循 [Conventional Commits](https://www.conventionalcommits.org/zh-hans/)（`feat` / `fix` / `docs` / `ci` / `chore`），描述使用中文
+- 基础格式（UTF-8 / LF / 2 空格缩进）由 [.editorconfig](.editorconfig) 统一约束
 
 ### 常见问题（FAQ）
 
@@ -448,8 +459,20 @@ A: 该错误已修复，统一使用 `var(--font-mono)`。如遇自定义样式�
 
 ---
 
+## 文档体系
+
+| 文档 | 说明 |
+| ------ | ------ |
+| [README.md](README.md) | 项目总览：架构 / 部署 / 数据维护（本文件） |
+| [CONTRIBUTING.md](CONTRIBUTING.md) | 贡献指南：开发流程 / 数据规范 / 提交与 PR 规范 |
+| [CHANGELOG.md](CHANGELOG.md) | 变更日志：版本历史与显著变更 |
+| [SECURITY.md](SECURITY.md) | 安全策略：漏洞报告渠道与内容红线 |
+| [LICENSE](LICENSE) | 版权与授权条款（保留所有权利） |
+
+---
+
 ## 许可证
 
 © 2025-2026 YYC³ (YanYuCloudCube™) · NVIDIA DGX Workbench 操作中心
 
-本项目的站点代码与内容归 YYC³ 所有。涉及的 NVIDIA 品牌、模型名称与第三方链接版权归其各自所有者。示例代码仅供学习参考，生产环境请遵循官方文档与安全规范。
+本项目站点代码与内容归 YYC³ 所有，详见 [LICENSE](LICENSE)。涉及的 NVIDIA 品牌、模型名称与第三方链接版权归其各自所有者。示例代码仅供学习参考，生产环境请遵循官方文档与安全规范。

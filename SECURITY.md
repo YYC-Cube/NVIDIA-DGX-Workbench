@@ -1,0 +1,27 @@
+# 安全策略 · Security Policy
+
+## 支持范围
+
+本项目为**纯静态单文件站点**（HTML + CSS + 原生 JS），无服务端、无数据库、无用户账户体系。安全策略覆盖：
+
+- 仓库中的站点代码与数据内容（`index.html`、`DGX-SPARK-HUB-OFFLINE.html`、`DGX-SPARK-HUB.html`、`DGX-SPARK-DATA.js`）
+- GitHub Pages 部署流水线（`.github/workflows/`）
+- 文档内容中引用的外部链接
+
+## 报告漏洞
+
+如发现以下情形，请通过 GitHub 仓库 **Security → Report a vulnerability**（私有漏洞报告）提交，勿直接公开 Issue：
+
+- 站点数据中泄露密钥、令牌、内网地址等敏感信息
+- 部署 workflow 存在权限配置风险
+- 外链内容指向钓鱼或恶意页面
+
+我们将在收到报告后尽快评估并回复。
+
+## 内容红线
+
+提交内容（含数据、文档、链接）不得包含：
+
+- 任何 API Key、密码、私有凭证或未公开的内网拓扑信息
+- 未经授权的第三方受版权保护内容的完整副本
+- 针对真实目标的攻击性操作指引（安全类内容仅限官方沙箱 / 授权测试场景）
