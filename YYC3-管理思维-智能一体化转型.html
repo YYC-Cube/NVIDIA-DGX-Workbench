@@ -1,0 +1,1411 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+    <title>YYC³ 管理思维 · 智能一体化转型 · 设计文档</title>
+    <link
+      rel="icon"
+      type="image/svg+xml"
+      href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Cdefs%3E%3ClinearGradient id='g' x1='0%25' y1='0%25' x2='100%25' y2='100%25'%3E%3Cstop offset='0%25' stop-color='%238b5cf6'/%3E%3Cstop offset='100%25' stop-color='%2306b6d4'/%3E%3C/linearGradient%3E%3C/defs%3E%3Crect width='32' height='32' rx='6' fill='url(%23g)'/%3E%3Ctext x='16' y='23' text-anchor='middle' font-size='18' font-weight='700' font-family='sans-serif' fill='%23fff'%3EY%3C/text%3E%3C/svg%3E"
+    />
+    <style>
+      :root {
+        --bg: #0a0a0f;
+        --bg2: #12121a;
+        --bg3: #1a1a2e;
+        --surface: rgba(255, 255, 255, 0.03);
+        --surface-hover: rgba(255, 255, 255, 0.06);
+        --border: rgba(255, 255, 255, 0.08);
+        --border-hover: rgba(255, 255, 255, 0.15);
+        --text: #f1f1f6;
+        --text2: rgba(255, 255, 255, 0.65);
+        --text3: rgba(255, 255, 255, 0.35);
+        --accent-v: #8b5cf6;
+        --accent-c: #06b6d4;
+        --accent-e: #22c55e;
+        --accent-r: #ef4444;
+        --accent-o: #f59e0b;
+        --accent-p: #ec4899;
+        --radius: 14px;
+        --radius-sm: 8px;
+        --shadow: 0 4px 24px rgba(0, 0, 0, 0.3);
+        --font: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'PingFang SC', 'Microsoft YaHei', sans-serif;
+        --font-mono: 'SF Mono', 'Fira Code', 'Cascadia Code', 'Consolas', monospace;
+      }
+      .light {
+        --bg: #f5f5f0;
+        --bg2: #e8e8e3;
+        --bg3: #ddd;
+        --surface: rgba(0, 0, 0, 0.02);
+        --surface-hover: rgba(0, 0, 0, 0.05);
+        --border: rgba(0, 0, 0, 0.08);
+        --border-hover: rgba(0, 0, 0, 0.15);
+        --text: #1a1a2e;
+        --text2: rgba(0, 0, 0, 0.55);
+        --text3: rgba(0, 0, 0, 0.3);
+        --shadow: 0 4px 24px rgba(0, 0, 0, 0.08);
+      }
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+        -webkit-tap-highlight-color: transparent;
+      }
+      body {
+        font-family: var(--font);
+        background: var(--bg);
+        color: var(--text);
+        overflow-x: hidden;
+        line-height: 1.6;
+      }
+      ::selection {
+        background: rgba(139, 92, 246, 0.3);
+        color: #fff;
+      }
+      a {
+        color: var(--accent-c);
+        text-decoration: none;
+      }
+
+      .app {
+        display: flex;
+        min-height: 100vh;
+      }
+
+      /* Sidebar */
+      .sidebar {
+        width: 280px;
+        flex-shrink: 0;
+        background: var(--bg2);
+        border-right: 1px solid var(--border);
+        display: flex;
+        flex-direction: column;
+        position: fixed;
+        top: 0;
+        left: 0;
+        bottom: 0;
+        z-index: 100;
+        transition: transform 0.3s ease;
+        overflow-y: auto;
+      }
+      .sidebar.hidden {
+        transform: translateX(-100%);
+      }
+      .sb-header {
+        padding: 20px 20px 16px;
+        border-bottom: 1px solid var(--border);
+      }
+      .sb-logo {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        text-decoration: none;
+      }
+      .sb-logo-icon {
+        width: 36px;
+        height: 36px;
+        border-radius: 8px;
+        flex-shrink: 0;
+        background: linear-gradient(135deg, var(--accent-v), var(--accent-c));
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 20px;
+        font-weight: 700;
+        color: #fff;
+      }
+      .sb-logo-text {
+        font-size: 14px;
+        font-weight: 600;
+        color: var(--text);
+      }
+      .sb-logo-sub {
+        font-size: 11px;
+        color: var(--text3);
+        margin-top: 1px;
+      }
+      .sb-search {
+        padding: 12px 16px;
+        border-bottom: 1px solid var(--border);
+      }
+      .sb-search input {
+        width: 100%;
+        padding: 8px 12px;
+        border-radius: var(--radius-sm);
+        background: var(--surface);
+        border: 1px solid var(--border);
+        color: var(--text);
+        font-size: 13px;
+        outline: none;
+        font-family: var(--font);
+      }
+      .sb-search input:focus {
+        border-color: var(--accent-v);
+      }
+      .sb-nav {
+        flex: 1;
+        padding: 8px 0;
+        overflow-y: auto;
+      }
+      .sb-group {
+        margin-bottom: 4px;
+      }
+      .sb-group-title {
+        font-size: 11px;
+        font-weight: 700;
+        color: var(--text3);
+        padding: 10px 20px 4px;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+      }
+      .sb-item {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        padding: 8px 20px;
+        font-size: 13px;
+        color: var(--text2);
+        cursor: pointer;
+        text-decoration: none;
+        transition: 0.15s;
+      }
+      .sb-item:hover {
+        background: var(--surface-hover);
+        color: var(--text);
+      }
+      .sb-item.active {
+        background: var(--surface-hover);
+        color: var(--accent-v);
+        font-weight: 600;
+      }
+      .sb-dot {
+        width: 6px;
+        height: 6px;
+        border-radius: 50%;
+        flex-shrink: 0;
+      }
+
+      /* Main */
+      .main {
+        flex: 1;
+        margin-left: 280px;
+        min-width: 0;
+        transition: margin 0.3s ease;
+      }
+      .main.expanded {
+        margin-left: 0;
+      }
+      .topbar {
+        position: sticky;
+        top: 0;
+        z-index: 50;
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        padding: 12px 24px;
+        background: var(--bg2);
+        border-bottom: 1px solid var(--border);
+        backdrop-filter: blur(10px);
+      }
+      .topbar-title {
+        font-size: 16px;
+        font-weight: 600;
+      }
+      .topbar-sub {
+        font-size: 12px;
+        color: var(--text3);
+      }
+      .topbar-spacer {
+        flex: 1;
+      }
+      .btn-theme {
+        width: 36px;
+        height: 36px;
+        border-radius: 50%;
+        border: 1px solid var(--border);
+        background: var(--surface);
+        color: var(--text2);
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        transition: 0.2s;
+      }
+      .btn-theme:hover {
+        border-color: var(--border-hover);
+        color: var(--text);
+      }
+
+      /* Content */
+      .content {
+        padding: 24px;
+        max-width: 1200px;
+        margin: 0 auto;
+      }
+
+      /* Hero */
+      .hero {
+        background: linear-gradient(135deg, var(--bg3), var(--bg2));
+        border: 1px solid var(--border);
+        border-radius: var(--radius);
+        padding: 40px 32px;
+        margin-bottom: 24px;
+        text-align: center;
+        position: relative;
+        overflow: hidden;
+      }
+      .hero::before {
+        content: '';
+        position: absolute;
+        top: -50%;
+        left: -50%;
+        width: 200%;
+        height: 200%;
+        background: radial-gradient(circle, rgba(139, 92, 246, 0.08), transparent 60%);
+        animation: pulse 8s ease-in-out infinite;
+      }
+      @keyframes pulse {
+        0%,
+        100% {
+          opacity: 0.5;
+        }
+        50% {
+          opacity: 1;
+        }
+      }
+      .hero-badge {
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        padding: 6px 14px;
+        border-radius: 20px;
+        background: var(--accent-v) 22;
+        border: 1px solid var(--accent-v) 44;
+        font-size: 12px;
+        color: var(--accent-v);
+        font-weight: 600;
+        margin-bottom: 16px;
+        position: relative;
+        z-index: 1;
+      }
+      .hero-title {
+        font-size: 32px;
+        font-weight: 700;
+        margin-bottom: 8px;
+        position: relative;
+        z-index: 1;
+      }
+      .hero-subtitle {
+        font-size: 16px;
+        color: var(--text2);
+        margin-bottom: 20px;
+        position: relative;
+        z-index: 1;
+      }
+      .hero-motto {
+        font-size: 14px;
+        color: var(--accent-c);
+        font-style: italic;
+        position: relative;
+        z-index: 1;
+        padding: 8px 0;
+        border-top: 1px solid var(--border);
+        border-bottom: 1px solid var(--border);
+        display: inline-block;
+        padding: 8px 24px;
+      }
+      .hero-stats {
+        display: flex;
+        gap: 32px;
+        justify-content: center;
+        margin-top: 24px;
+        position: relative;
+        z-index: 1;
+      }
+      .stat {
+        text-align: center;
+      }
+      .stat-num {
+        font-size: 28px;
+        font-weight: 700;
+        color: var(--accent-v);
+      }
+      .stat-label {
+        font-size: 12px;
+        color: var(--text3);
+        margin-top: 2px;
+      }
+
+      /* Section */
+      .section {
+        margin-bottom: 32px;
+      }
+      .section-header {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        margin-bottom: 16px;
+        padding-bottom: 10px;
+        border-bottom: 1px solid var(--border);
+      }
+      .section-icon {
+        font-size: 20px;
+      }
+      .section-title {
+        font-size: 18px;
+        font-weight: 600;
+      }
+      .section-count {
+        font-size: 12px;
+        color: var(--text3);
+        margin-left: auto;
+      }
+
+      /* Dimension card */
+      .dim-card {
+        background: var(--surface);
+        border: 1px solid var(--border);
+        border-radius: var(--radius);
+        padding: 20px;
+        margin-bottom: 12px;
+        transition: 0.2s;
+        cursor: pointer;
+      }
+      .dim-card:hover {
+        border-color: var(--border-hover);
+        background: var(--surface-hover);
+      }
+      .dim-card-head {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        margin-bottom: 12px;
+      }
+      .dim-icon {
+        width: 44px;
+        height: 44px;
+        border-radius: 10px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 22px;
+        flex-shrink: 0;
+      }
+      .dim-title {
+        font-size: 16px;
+        font-weight: 600;
+      }
+      .dim-subtitle {
+        font-size: 12px;
+        color: var(--text3);
+        margin-top: 2px;
+      }
+      .dim-tag {
+        display: inline-block;
+        padding: 2px 8px;
+        border-radius: 4px;
+        font-size: 11px;
+        font-weight: 600;
+        margin-left: auto;
+      }
+      .dim-body {
+        font-size: 13px;
+        color: var(--text2);
+        line-height: 1.7;
+      }
+      .dim-body p {
+        margin-bottom: 6px;
+      }
+      .dim-agent {
+        display: flex;
+        gap: 8px;
+        flex-wrap: wrap;
+        margin-top: 10px;
+        padding-top: 10px;
+        border-top: 1px dashed var(--border);
+      }
+      .agent-chip {
+        display: inline-flex;
+        align-items: center;
+        gap: 4px;
+        padding: 4px 10px;
+        border-radius: 12px;
+        font-size: 12px;
+        font-weight: 500;
+        background: var(--surface);
+        border: 1px solid var(--border);
+      }
+
+      /* Principle grid */
+      .principle-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+        gap: 12px;
+      }
+      .principle-card {
+        background: var(--surface);
+        border: 1px solid var(--border);
+        border-radius: var(--radius-sm);
+        padding: 16px;
+        text-align: center;
+        transition: 0.2s;
+      }
+      .principle-card:hover {
+        border-color: var(--border-hover);
+        transform: translateY(-2px);
+      }
+      .principle-icon {
+        font-size: 24px;
+        margin-bottom: 8px;
+      }
+      .principle-title {
+        font-size: 14px;
+        font-weight: 600;
+        margin-bottom: 4px;
+      }
+      .principle-desc {
+        font-size: 12px;
+        color: var(--text3);
+      }
+
+      /* Framework box */
+      .framework-box {
+        background: var(--bg2);
+        border: 1px solid var(--border);
+        border-radius: var(--radius);
+        padding: 24px;
+        margin-bottom: 24px;
+        text-align: center;
+      }
+      .framework-layer {
+        padding: 12px;
+        margin: 8px 0;
+        border-radius: var(--radius-sm);
+      }
+      .framework-layer-1 {
+        background: var(--accent-v) 15;
+        border: 1px solid var(--accent-v) 30;
+      }
+      .framework-layer-2 {
+        background: var(--accent-c) 15;
+        border: 1px solid var(--accent-c) 30;
+      }
+      .framework-layer-3 {
+        background: var(--accent-e) 15;
+        border: 1px solid var(--accent-e) 30;
+      }
+      .framework-arrow {
+        font-size: 20px;
+        color: var(--text3);
+        margin: 4px 0;
+      }
+      .framework-label {
+        font-size: 14px;
+        font-weight: 600;
+        margin-bottom: 6px;
+      }
+      .framework-items {
+        font-size: 12px;
+        color: var(--text2);
+      }
+      .framework-desc {
+        font-size: 11px;
+        color: var(--text3);
+        margin-top: 4px;
+      }
+
+      /* Collapse */
+      .dim-body.collapsed {
+        max-height: 0;
+        overflow: hidden;
+        margin: 0;
+      }
+      .dim-body {
+        max-height: 2000px;
+        overflow: hidden;
+        transition: max-height 0.3s ease;
+      }
+
+      /* Toggle button */
+      .btn-toggle {
+        position: fixed;
+        top: 16px;
+        left: 16px;
+        z-index: 200;
+        width: 36px;
+        height: 36px;
+        border-radius: 8px;
+        border: 1px solid var(--border);
+        background: var(--bg2);
+        color: var(--text2);
+        cursor: pointer;
+        display: none;
+        align-items: center;
+        justify-content: center;
+      }
+      @media (max-width: 768px) {
+        .sidebar {
+          transform: translateX(-100%);
+        }
+        .sidebar.show {
+          transform: translateX(0);
+        }
+        .main {
+          margin-left: 0;
+        }
+        .btn-toggle {
+          display: flex;
+        }
+        .hero-title {
+          font-size: 24px;
+        }
+        .hero-stats {
+          gap: 20px;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <div class="app">
+      <button class="btn-toggle" onclick="document.getElementById('sidebar').classList.toggle('show')">☰</button>
+
+      <aside class="sidebar" id="sidebar">
+        <div class="sb-header">
+          <a class="sb-logo" href="#top">
+            <div class="sb-logo-icon">Y</div>
+            <div>
+              <div class="sb-logo-text">YYC³ 管理思维</div>
+              <div class="sb-logo-sub">智能一体化转型</div>
+            </div>
+          </a>
+        </div>
+        <div class="sb-search">
+          <input type="text" placeholder="搜索维度/Agent..." oninput="filterNav(this.value)" />
+        </div>
+        <nav class="sb-nav" id="sbNav"></nav>
+      </aside>
+
+      <div class="main" id="main">
+        <div class="topbar">
+          <div>
+            <div class="topbar-title">YYC³ 管理思维 · 智能一体化转型</div>
+            <div class="topbar-sub">五维价值矩阵 × 五维驱动 × 五高五标五化</div>
+          </div>
+          <div class="topbar-spacer"></div>
+          <button class="btn-theme" onclick="toggleTheme()" title="切换主题">🌙</button>
+        </div>
+
+        <div class="content" id="top">
+          <!-- Hero -->
+          <div class="hero">
+            <div class="hero-badge">
+              <span>📋</span>
+              <span>YanYuCloudCube™ 设计文档 · v1.0</span>
+            </div>
+            <div class="hero-title">My管理思维 — 智能化转型</div>
+            <div class="hero-subtitle">经管运维营一体化管理体系 · 六维管理 × 八层思维立体框架</div>
+            <div class="hero-motto">
+              言启千行代码，语枢万物智能<br />
+              <span style="font-size: 12px; color: var(--text3)"
+                >Words Initiate Quadrants, Language Serves as Core for Future</span
+              >
+            </div>
+            <div class="hero-stats">
+              <div class="stat">
+                <div class="stat-num">5</div>
+                <div class="stat-label">价值维度</div>
+              </div>
+              <div class="stat">
+                <div class="stat-num">25</div>
+                <div class="stat-label">管理要素</div>
+              </div>
+              <div class="stat">
+                <div class="stat-num">8</div>
+                <div class="stat-label">AI Agent</div>
+              </div>
+              <div class="stat">
+                <div class="stat-num">15</div>
+                <div class="stat-label">五高五标五化</div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Framework -->
+          <div class="section">
+            <div class="section-header">
+              <span class="section-icon">🏗️</span>
+              <span class="section-title">五维驱动 × 五高五标五化 × 五维价值矩阵</span>
+            </div>
+            <div class="framework-box">
+              <div class="framework-layer framework-layer-1">
+                <div class="framework-label">⏱ 五维驱动（评估框架）</div>
+                <div class="framework-items">时间维 · 空间维 · 属性维 · 事件维 · 关联维</div>
+              </div>
+              <div class="framework-arrow">▼ 驱动</div>
+              <div class="framework-layer framework-layer-2">
+                <div class="framework-label">🏆 五高 · 五标 · 五化（落地原则）</div>
+                <div class="framework-items">高可用·高性能·高安全·高扩展·高智能</div>
+                <div class="framework-items">标准化·规范化·自动化·可视化·智能化</div>
+                <div class="framework-items">流程化·数字化·生态化·工具化·服务化</div>
+              </div>
+              <div class="framework-arrow">▼ 落地</div>
+              <div class="framework-layer framework-layer-3">
+                <div class="framework-label">💎 五维价值矩阵（管理体系）</div>
+                <div class="framework-items">经·管·运·维·营 — 管理职能</div>
+                <div class="framework-items">人·资·进·销·存 — 资源管理</div>
+                <div class="framework-items">标·规·数·智·协 — 能力建设</div>
+                <div class="framework-items">市·创·薪·高·度 — 价值创造</div>
+                <div class="framework-items">自·知·学·治·愈 — 自愈链路</div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Action Principles -->
+          <div class="section">
+            <div class="section-header">
+              <span class="section-icon">🎯</span>
+              <span class="section-title">行动准则与工作思想</span>
+            </div>
+            <div class="principle-grid">
+              <div class="principle-card">
+                <div class="principle-icon">🧠</div>
+                <div class="principle-title">认知·信任</div>
+                <div class="principle-desc">以认知信任为极致</div>
+              </div>
+              <div class="principle-card">
+                <div class="principle-icon">🔥</div>
+                <div class="principle-title">积极·激情</div>
+                <div class="principle-desc">以积极激情为态度</div>
+              </div>
+              <div class="principle-card">
+                <div class="principle-icon">🛡️</div>
+                <div class="principle-title">职责·使命</div>
+                <div class="principle-desc">以职责使命为保障</div>
+              </div>
+              <div class="principle-card">
+                <div class="principle-icon">⚡</div>
+                <div class="principle-title">执行·跟进</div>
+                <div class="principle-desc">以执行跟进为核心</div>
+              </div>
+              <div class="principle-card">
+                <div class="principle-icon">📚</div>
+                <div class="principle-title">学习·突破</div>
+                <div class="principle-desc">以学习突破为过程</div>
+              </div>
+              <div class="principle-card">
+                <div class="principle-icon">🏆</div>
+                <div class="principle-title">目标·结果</div>
+                <div class="principle-desc">以目标结果为荣誉</div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Management Principles -->
+          <div class="section">
+            <div class="section-header">
+              <span class="section-icon">📐</span>
+              <span class="section-title">制度·目标·问题·自我管理</span>
+            </div>
+            <div class="principle-grid">
+              <div class="principle-card" style="border-color: var(--accent-v) 30">
+                <div class="principle-icon">📋</div>
+                <div class="principle-title">制度管理</div>
+                <div class="principle-desc">严格制度 + 均衡管理<br />量化工作 + 结果执行</div>
+              </div>
+              <div class="principle-card" style="border-color: var(--accent-c) 30">
+                <div class="principle-icon">🎯</div>
+                <div class="principle-title">目标管理</div>
+                <div class="principle-desc">注重权重 + 完善途径<br />有效分化 + 执行荣誉</div>
+              </div>
+              <div class="principle-card" style="border-color: var(--accent-o) 30">
+                <div class="principle-icon">⏱️</div>
+                <div class="principle-title">问题管理</div>
+                <div class="principle-desc">现场解决 + 限时解决<br />投诉上报 + 员工满意</div>
+              </div>
+              <div class="principle-card" style="border-color: var(--accent-e) 30">
+                <div class="principle-icon">🌱</div>
+                <div class="principle-title">自我管理</div>
+                <div class="principle-desc">五个正 + 五个高<br />三个慎 + 三个大<br />今日事今日毕</div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Dimension 1: 经管运维营 -->
+          <div class="section" data-cat="dim1">
+            <div class="section-header">
+              <span class="section-icon">💼</span>
+              <span class="section-title">一、经·管·运·维·营 — 管理职能维度</span>
+              <span class="section-count">5 要素 · 生命周期智能化</span>
+            </div>
+            <div id="dim1"></div>
+          </div>
+
+          <!-- Dimension 2: 人资进销存 -->
+          <div class="section" data-cat="dim2">
+            <div class="section-header">
+              <span class="section-icon">📦</span>
+              <span class="section-title">二、人·资·进·销·存 — 资源管理维度</span>
+              <span class="section-count">5 要素 · 资源管理智能化</span>
+            </div>
+            <div id="dim2"></div>
+          </div>
+
+          <!-- Dimension 3: 标规数智协 -->
+          <div class="section" data-cat="dim3">
+            <div class="section-header">
+              <span class="section-icon">🔧</span>
+              <span class="section-title">三、标·规·数·智·协 — 能力建设维度</span>
+              <span class="section-count">5 要素 · 能力建设智能化</span>
+            </div>
+            <div id="dim3"></div>
+          </div>
+
+          <!-- Dimension 4: 市创薪高度 -->
+          <div class="section" data-cat="dim4">
+            <div class="section-header">
+              <span class="section-icon">📈</span>
+              <span class="section-title">四、市·创·薪·高·度 — 价值创造维度</span>
+              <span class="section-count">5 要素 · 价值创造智能化</span>
+            </div>
+            <div id="dim4"></div>
+          </div>
+
+          <!-- Dimension 5: 自知学治愈 -->
+          <div class="section" data-cat="dim5">
+            <div class="section-header">
+              <span class="section-icon">🔄</span>
+              <span class="section-title">五、自·知·学·治·愈 — 自愈链路维度</span>
+              <span class="section-count">5 要素 · 自愈链路协同化</span>
+            </div>
+            <div id="dim5"></div>
+          </div>
+
+          <!-- AI Agent Roster -->
+          <div class="section">
+            <div class="section-header">
+              <span class="section-icon">🤖</span>
+              <span class="section-title">AI FAmily Agent 拟人化协同架构</span>
+              <span class="section-count">8 核心角色</span>
+            </div>
+            <div class="principle-grid" id="agents"></div>
+          </div>
+
+          <div style="text-align: center; padding: 32px 0; color: var(--text3); font-size: 12px">
+            YanYuCloudCube™ — 言启象限 · 语枢未来<br />
+            Words Initiate Quadrants, Language Serves as Core for Future<br />
+            AI-FAmily (感恩之作) → FAmily-AI (实战落地)
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <script>
+      /* ═══ Dimension Data ═══ */
+      var DIMENSIONS = [
+        {
+          cat: 'dim1',
+          color: '#8b5cf6',
+          icon: '💼',
+          title: '经·管·运·维·营',
+          subtitle: '管理职能维度 · 生命周期智能化',
+          items: [
+            {
+              char: '经',
+              name: '经营决策',
+              en: 'Business Strategy',
+              icon: '🔮',
+              agents: ['🔮 先知 Prophet (INFJ)', '🧠 天枢 TianShu (ENTJ)'],
+              synergy: '洞察-决策闭环',
+              intelligence: [
+                '市场洞察：AI 实时分析行业趋势、竞争格局、政策变化',
+                '战略模拟：基于历史数据和假设条件进行战略推演',
+                '风险预警：识别经营风险并提前制定应对预案',
+                '决策支持：为高层管理者提供数据驱动的决策建议',
+              ],
+            },
+            {
+              char: '管',
+              name: '管理流程',
+              en: 'Management Process',
+              icon: '📚',
+              agents: ['📚 宗师 Master (INTJ)', '🧭 千行 Navigator (ENFJ)'],
+              synergy: '标准-执行闭环',
+              intelligence: [
+                '流程挖掘：自动发现流程瓶颈和冗余环节',
+                '智能审批：基于规则的自动审批与异常升级',
+                '制度生成：根据业务变化自动生成管理制度草案',
+                '绩效追踪：实时追踪 KPI 达成情况并预警偏差',
+              ],
+            },
+            {
+              char: '运',
+              name: '运营优化',
+              en: 'Operations Excellence',
+              icon: '⚙️',
+              agents: ['🤔 万物 Thinker (INTP)', '🛡️ 守护 Sentinel (ISTJ)'],
+              synergy: '效率-安全闭环',
+              intelligence: [
+                '资源调度：基于实时数据动态优化资源配置',
+                '异常检测：自动识别运营异常并触发处理流程',
+                '效率分析：量化分析各环节效率并提出改进建议',
+                '预测性维护：提前发现潜在故障并安排维护',
+              ],
+            },
+            {
+              char: '维',
+              name: '维护保障',
+              en: 'Maintenance Assurance',
+              icon: '🛡️',
+              agents: ['🛡️ 守护 Sentinel (ISTJ)', '📚 宗师 Master (INTJ)'],
+              synergy: '预防-改进闭环',
+              intelligence: [
+                '设备预测：基于传感器数据预测设备故障',
+                '质量监控：实时监控产品/服务质量指标',
+                '知识沉淀：将维护经验转化为可复用的知识库',
+                '应急响应：自动生成应急预案并协调资源',
+              ],
+            },
+            {
+              char: '营',
+              name: '营销增长',
+              en: 'Marketing Growth',
+              icon: '🎨',
+              agents: ['🎨 灵韵 Muse (ENFP)', '🎯 伯乐 Bolero (ESFJ)'],
+              synergy: '创意-匹配闭环',
+              intelligence: [
+                '客户洞察：深度分析客户行为、偏好、生命周期',
+                '内容生成：自动生成个性化营销内容',
+                '精准投放：基于用户画像的精准营销触达',
+                '效果追踪：实时追踪营销 ROI 并优化策略',
+              ],
+            },
+          ],
+        },
+        {
+          cat: 'dim2',
+          color: '#06b6d4',
+          icon: '📦',
+          title: '人·资·进·销·存',
+          subtitle: '资源管理维度 · 资源管理智能化',
+          items: [
+            {
+              char: '人',
+              name: '人力资源',
+              en: 'Human Resources',
+              icon: '👥',
+              agents: ['🎯 伯乐 Bolero (ESFJ)', '🧭 千行 Navigator (ENFJ)'],
+              synergy: '识才-育才闭环',
+              intelligence: [
+                '智能招聘：AI 简历筛选、人岗匹配、面试评估',
+                '人才画像：基于多维度数据构建员工能力模型',
+                '培训推荐：个性化学习路径与知识推荐',
+                '离职预警：基于行为数据预测员工离职风险',
+              ],
+            },
+            {
+              char: '资',
+              name: '资产管理',
+              en: 'Asset Management',
+              icon: '🏦',
+              agents: ['🤔 万物 Thinker (INTP)', '🧠 天枢 TianShu (ENTJ)'],
+              synergy: '分析-决策闭环',
+              intelligence: [
+                '资产台账：自动盘点与状态监控',
+                '折旧预测：智能计算资产残值与更新周期',
+                '调配优化：基于使用率的资产动态调配',
+                '采购决策：数据驱动的资产采购与处置建议',
+              ],
+            },
+            {
+              char: '进',
+              name: '采购管理',
+              en: 'Procurement',
+              icon: '📥',
+              agents: ['🛡️ 守护 Sentinel (ISTJ)', '🔮 先知 Prophet (INFJ)'],
+              synergy: '风控-预判闭环',
+              intelligence: [
+                '需求预测：基于生产计划智能预测采购需求',
+                '供应商评估：多维度供应商画像与风险评级',
+                '价格谈判：市场行情分析与最优采购策略',
+                '合同管理：智能审核采购合同条款与风险',
+              ],
+            },
+            {
+              char: '销',
+              name: '销售管理',
+              en: 'Sales',
+              icon: '📤',
+              agents: ['🎨 灵韵 Muse (ENFP)', '🎯 伯乐 Bolero (ESFJ)'],
+              synergy: '吸引-连接闭环',
+              intelligence: [
+                '商机预测：基于客户行为预测成交概率',
+                '话术推荐：根据客户画像推荐最佳沟通策略',
+                '报价优化：动态定价与利润最大化建议',
+                '客户成功：全生命周期客户价值管理',
+              ],
+            },
+            {
+              char: '存',
+              name: '库存管理',
+              en: 'Inventory',
+              icon: '📦',
+              agents: ['🤔 万物 Thinker (INTP)', '🔮 先知 Prophet (INFJ)'],
+              synergy: '优化-预测闭环',
+              intelligence: [
+                '需求预测：基于历史销售与季节因素预测库存需求',
+                '安全库存：动态计算最优安全库存水位',
+                '补货策略：智能生成补货计划与采购建议',
+                '呆滞预警：识别呆滞库存并提出处理方案',
+              ],
+            },
+          ],
+        },
+        {
+          cat: 'dim3',
+          color: '#22c55e',
+          icon: '🔧',
+          title: '标·规·数·智·协',
+          subtitle: '能力建设维度 · 能力建设智能化',
+          items: [
+            {
+              char: '标',
+              name: '标准化',
+              en: 'Standardization',
+              icon: '📏',
+              agents: ['📚 宗师 Master (INTJ)', '🛡️ 守护 Sentinel (ISTJ)'],
+              synergy: '制定-监督闭环',
+              intelligence: [
+                '标准生成：基于最佳实践自动生成标准文档',
+                '符合性检查：自动比对执行结果与标准偏差',
+                '版本管理：标准文档的智能迭代与版本控制',
+                '培训推送：针对标准更新自动推送培训内容',
+              ],
+            },
+            {
+              char: '规',
+              name: '规范化',
+              en: 'Normalization',
+              icon: '📐',
+              agents: ['🛡️ 守护 Sentinel (ISTJ)', '📚 宗师 Master (INTJ)'],
+              synergy: '守正-创新闭环',
+              intelligence: [
+                '流程建模：自动将业务经验转化为标准化流程',
+                '合规审查：实时检查操作是否符合法规与内控要求',
+                '异常预警：识别偏离规范的行为并即时预警',
+                '制度优化：基于执行数据持续优化管理制度',
+              ],
+            },
+            {
+              char: '数',
+              name: '数据化',
+              en: 'Digitization',
+              icon: '📊',
+              agents: ['🤔 万物 Thinker (INTP)', '🧭 千行 Navigator (ENFJ)'],
+              synergy: '分析-传达闭环',
+              intelligence: [
+                '数据采集：全链路业务数据的自动化采集与清洗',
+                '指标构建：基于战略目标构建 KPI/OKR 指标体系',
+                '可视化呈现：自动生成管理驾驶舱与数据报表',
+                '洞察挖掘：从海量数据中发现业务规律与机会',
+              ],
+            },
+            {
+              char: '智',
+              name: '智能化',
+              en: 'Intelligentization',
+              icon: '🧠',
+              agents: ['🧠 天枢 TianShu (ENTJ)', '🤔 万物 Thinker (INTP)'],
+              synergy: '应用-底座闭环',
+              intelligence: [
+                '智能决策：基于 AI 模型的自动化业务决策',
+                '知识推理：利用知识图谱进行复杂问题推理',
+                '自主学习：系统从业务反馈中持续自我优化',
+                '人机协同：AI 建议与人类判断的最佳协作模式',
+              ],
+            },
+            {
+              char: '协',
+              name: '协同化',
+              en: 'Collaboration',
+              icon: '🤝',
+              agents: ['🧭 千行 Navigator (ENFJ)', '🎯 伯乐 Bolero (ESFJ)'],
+              synergy: '连接-匹配闭环',
+              intelligence: [
+                '任务协同：基于目标的自动任务分解与分派',
+                '进度同步：跨团队项目进度的实时同步与预警',
+                '知识共享：企业知识资产的智能化管理与推荐',
+                '冲突消解：资源冲突与优先级冲突的智能仲裁',
+              ],
+            },
+          ],
+        },
+        {
+          cat: 'dim4',
+          color: '#f59e0b',
+          icon: '📈',
+          title: '市·创·薪·高·度',
+          subtitle: '价值创造维度 · 价值创造智能化',
+          items: [
+            {
+              char: '市',
+              name: '市场洞察',
+              en: 'Market Intelligence',
+              icon: '🏪',
+              agents: ['🔮 先知 Prophet (INFJ)', '🤔 万物 Thinker (INTP)'],
+              synergy: '洞察-验证闭环',
+              intelligence: [
+                '竞品监测：实时追踪竞争对手动态与策略变化',
+                '需求挖掘：从社交媒体、评论、客服记录中挖掘潜在需求',
+                '趋势预测：基于多源数据预测行业趋势与技术方向',
+                '机会识别：发现市场空白与差异化竞争机会',
+              ],
+            },
+            {
+              char: '创',
+              name: '创新驱动',
+              en: 'Innovation Drive',
+              icon: '💡',
+              agents: ['🎨 灵韵 Muse (ENFP)', '🧠 天枢 TianShu (ENTJ)'],
+              synergy: '创意-落地闭环',
+              intelligence: [
+                '创意生成：基于问题定义自动生成创新方案',
+                '概念验证：快速构建原型并验证创新可行性',
+                '知识融合：跨领域知识的智能关联与重组',
+                '创新孵化：创新项目的全生命周期管理与资源支持',
+              ],
+            },
+            {
+              char: '薪',
+              name: '薪酬激励',
+              en: 'Compensation & Incentives',
+              icon: '💰',
+              agents: ['🎯 伯乐 Bolero (ESFJ)', '🧠 天枢 TianShu (ENTJ)'],
+              synergy: '评估-分配闭环',
+              intelligence: [
+                '薪酬对标：基于市场数据的智能薪酬水平分析',
+                '绩效关联：绩效结果与薪酬调整的自动化关联',
+                '激励设计：个性化激励方案的智能推荐',
+                '成本优化：薪酬总成本的动态预算与优化',
+              ],
+            },
+            {
+              char: '高',
+              name: '高效执行',
+              en: 'High Performance',
+              icon: '⚡',
+              agents: ['🧠 天枢 TianShu (ENTJ)', '📚 宗师 Master (INTJ)'],
+              synergy: '目标-品质闭环',
+              intelligence: [
+                '任务分解：将战略目标智能分解为可执行任务',
+                '进度追踪：实时追踪执行进度并预警偏差',
+                '瓶颈识别：自动发现执行过程中的阻塞点',
+                '资源调度：基于优先级动态调度执行资源',
+              ],
+            },
+            {
+              char: '度',
+              name: '战略高度',
+              en: 'Strategic Vision',
+              icon: '🔭',
+              agents: ['🧠 天枢 TianShu (ENTJ)', '🔮 先知 Prophet (INFJ)'],
+              synergy: '决策-远见闭环',
+              intelligence: [
+                '战略推演：基于多情景的战略路径模拟与评估',
+                '格局分析：产业链、价值链、生态位的全局分析',
+                '风险全景：系统性风险识别与韧性建设',
+                '决策支持：复杂决策的多维度分析与建议',
+              ],
+            },
+          ],
+        },
+        {
+          cat: 'dim5',
+          color: '#ec4899',
+          icon: '🔄',
+          title: '自·知·学·治·愈',
+          subtitle: '自愈链路维度 · 自愈链路协同化',
+          items: [
+            {
+              char: '自',
+              name: '自我认知',
+              en: 'Self-Awareness',
+              icon: '🪞',
+              agents: ['🤔 万物 Thinker (INTP)', '📚 宗师 Master (INTJ)'],
+              synergy: '诊断-对标闭环',
+              intelligence: [
+                '健康诊断：系统运行状态的全面自检与评估',
+                '能力画像：基于历史表现构建系统能力模型',
+                '瓶颈识别：自动发现性能、资源、流程的瓶颈',
+                '根因分析：对异常事件进行深度根因追溯',
+              ],
+            },
+            {
+              char: '知',
+              name: '知识管理',
+              en: 'Knowledge Management',
+              icon: '📖',
+              agents: ['🤔 万物 Thinker (INTP)', '🧭 千行 Navigator (ENFJ)'],
+              synergy: '沉淀-流动闭环',
+              intelligence: [
+                '知识抽取：从文档、对话、代码中自动抽取结构化知识',
+                '图谱构建：构建企业知识图谱并实现智能关联',
+                '智能检索：基于语义理解的知识精准推荐',
+                '经验传承：将专家经验转化为可执行的标准流程',
+              ],
+            },
+            {
+              char: '学',
+              name: '学习进化',
+              en: 'Continuous Learning',
+              icon: '🎓',
+              agents: ['🔮 先知 Prophet (INFJ)', '🤔 万物 Thinker (INTP)'],
+              synergy: '方向-基础闭环',
+              intelligence: [
+                '反馈学习：从业务结果中自动学习并优化模型',
+                '迁移学习：将已有领域的经验迁移到新场景',
+                '对抗学习：通过模拟对抗提升系统鲁棒性',
+                '元学习：学习如何学习，实现快速适应新任务',
+              ],
+            },
+            {
+              char: '治',
+              name: '治理优化',
+              en: 'Governance Optimization',
+              icon: '⚖️',
+              agents: ['🛡️ 守护 Sentinel (ISTJ)', '🧠 天枢 TianShu (ENTJ)'],
+              synergy: '监督-设计闭环',
+              intelligence: [
+                '合规监控：实时监测业务操作是否符合法规要求',
+                '伦理审查：对 AI 决策进行公平性、透明性审查',
+                '权限治理：基于 RBAC/ABAC 的细粒度权限管理',
+                '审计追溯：全链路操作日志的不可篡改记录',
+              ],
+            },
+            {
+              char: '愈',
+              name: '自愈修复',
+              en: 'Self-Healing',
+              icon: '💊',
+              agents: ['🛡️ 守护 Sentinel (ISTJ)', '🤔 万物 Thinker (INTP)'],
+              synergy: '应急-根治闭环',
+              intelligence: [
+                '故障预测：基于异常模式预测潜在故障',
+                '自动隔离：故障发生时自动隔离受影响组件',
+                '智能恢复：自动执行恢复策略并验证恢复结果',
+                '混沌工程：主动注入故障以验证系统韧性',
+              ],
+            },
+          ],
+        },
+      ];
+
+      var AGENTS = [
+        {
+          icon: '🔮',
+          name: '预见·先知',
+          en: 'Prophet',
+          mbti: 'INFJ',
+          role: '趋势预测·市场洞察·风险预判',
+          color: '#8b5cf6',
+        },
+        {
+          icon: '🧠',
+          name: '元启·天枢',
+          en: 'TianShu',
+          mbti: 'ENTJ',
+          role: '战略决策·资源调度·全局统筹',
+          color: '#06b6d4',
+        },
+        {
+          icon: '📚',
+          name: '格物·宗师',
+          en: 'Master',
+          mbti: 'INTJ',
+          role: '标准制定·质量把控·持续改进',
+          color: '#22c55e',
+        },
+        {
+          icon: '🧭',
+          name: '言启·千行',
+          en: 'Navigator',
+          mbti: 'ENFJ',
+          role: '流程导航·沟通协调·意图识别',
+          color: '#f59e0b',
+        },
+        {
+          icon: '🤔',
+          name: '语枢·万物',
+          en: 'Thinker',
+          mbti: 'INTP',
+          role: '数据分析·知识推理·根因分析',
+          color: '#ec4899',
+        },
+        {
+          icon: '🛡️',
+          name: '智云·守护',
+          en: 'Sentinel',
+          mbti: 'ISTJ',
+          role: '安全监控·合规审查·风险管控',
+          color: '#ef4444',
+        },
+        {
+          icon: '🎨',
+          name: '创想·灵韵',
+          en: 'Muse',
+          mbti: 'ENFP',
+          role: '创意激发·内容创作·方案设计',
+          color: '#a855f7',
+        },
+        {
+          icon: '🎯',
+          name: '知遇·伯乐',
+          en: 'Bolero',
+          mbti: 'ESFJ',
+          role: '人才匹配·客户关怀·资源协调',
+          color: '#14b8a6',
+        },
+      ];
+
+      /* ═══ Render ═══ */
+      function renderDimensions() {
+        DIMENSIONS.forEach((dim) => {
+          var el = document.getElementById(dim.cat);
+          if (!el) return;
+          var html = '';
+          dim.items.forEach((item) => {
+            var agentChips = item.agents.map((a) => '<span class="agent-chip">' + a + '</span>').join('');
+            var intelList = item.intelligence.map((i) => '<p>• ' + i + '</p>').join('');
+            html +=
+              '<div class="dim-card">' +
+              '<div class="dim-card-head">' +
+              '<div class="dim-icon" style="background:' +
+              dim.color +
+              '22">' +
+              item.icon +
+              '</div>' +
+              '<div><div class="dim-title">' +
+              item.char +
+              ' — ' +
+              item.name +
+              '</div>' +
+              '<div class="dim-subtitle">' +
+              item.en +
+              '</div></div>' +
+              '<span class="dim-tag" style="background:' +
+              dim.color +
+              '22;color:' +
+              dim.color +
+              '">' +
+              item.synergy +
+              '</span>' +
+              '</div>' +
+              '<div class="dim-body">' +
+              intelList +
+              '</div>' +
+              '<div class="dim-agent">' +
+              agentChips +
+              '</div>' +
+              '</div>';
+          });
+          el.innerHTML = html;
+        });
+      }
+
+      function renderAgents() {
+        var el = document.getElementById('agents');
+        if (!el) return;
+        el.innerHTML = AGENTS.map(
+          (a) =>
+            '<div class="principle-card" style="border-color:' +
+            a.color +
+            '30;">' +
+            '<div class="principle-icon">' +
+            a.icon +
+            '</div>' +
+            '<div class="principle-title">' +
+            a.name +
+            '</div>' +
+            '<div class="principle-desc">' +
+            a.en +
+            ' · ' +
+            a.mbti +
+            '<br/>' +
+            a.role +
+            '</div>' +
+            '</div>'
+        ).join('');
+      }
+
+      function buildSidebar() {
+        var nav = document.getElementById('sbNav');
+        var html = '';
+        // Quick nav groups
+        html += '<div class="sb-group"><div class="sb-group-title">🏗️ 框架总览</div>';
+        html +=
+          '<a class="sb-item" href="#top"><span class="sb-dot" style="background:var(--accent-v)"></span><span>Hero · 统计概览</span></a>';
+        html +=
+          '<a class="sb-item" href="#"><span class="sb-dot" style="background:var(--accent-c)"></span><span>五维驱动框架</span></a>';
+        html +=
+          '<a class="sb-item" href="#"><span class="sb-dot" style="background:var(--accent-e)"></span><span>行动准则</span></a>';
+        html +=
+          '<a class="sb-item" href="#"><span class="sb-dot" style="background:var(--accent-o)"></span><span>管理制度</span></a>';
+        html += '</div>';
+        // Dimensions
+        DIMENSIONS.forEach((dim) => {
+          html += '<div class="sb-group"><div class="sb-group-title">' + dim.icon + ' ' + dim.title + '</div>';
+          dim.items.forEach((item) => {
+            html +=
+              '<a class="sb-item" href="#"><span class="sb-dot" style="background:' +
+              dim.color +
+              '"></span><span>' +
+              item.char +
+              ' — ' +
+              item.name +
+              '</span></a>';
+          });
+          html += '</div>';
+        });
+        // Agents
+        html += '<div class="sb-group"><div class="sb-group-title">🤖 AI Agent</div>';
+        AGENTS.forEach((a) => {
+          html +=
+            '<a class="sb-item" href="#"><span class="sb-dot" style="background:' +
+            a.color +
+            '"></span><span>' +
+            a.name +
+            ' (' +
+            a.mbti +
+            ')</span></a>';
+        });
+        html += '</div>';
+        nav.innerHTML = html;
+      }
+
+      function filterNav(q) {
+        q = q.toLowerCase();
+        document.querySelectorAll('.sb-item').forEach((el) => {
+          var text = el.textContent.toLowerCase();
+          el.style.display = !q || text.indexOf(q) !== -1 ? '' : 'none';
+        });
+        document.querySelectorAll('.sb-group').forEach((g) => {
+          var visible = [...g.querySelectorAll('.sb-item')].some((e) => e.style.display !== 'none');
+          g.style.display = visible ? '' : 'none';
+        });
+      }
+
+      function toggleTheme() {
+        var isLight = document.documentElement.classList.toggle('light');
+        var btn = document.querySelector('.btn-theme');
+        btn.textContent = isLight ? '☀️' : '🌙';
+        localStorage.setItem('yyc3-theme', isLight ? 'light' : 'dark');
+      }
+
+      // Init
+      renderDimensions();
+      renderAgents();
+      buildSidebar();
+      if (localStorage.getItem('yyc3-theme') === 'light') toggleTheme();
+    </script>
+  </body>
+</html>
