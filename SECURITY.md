@@ -4,7 +4,7 @@
 
 本项目为**纯静态单文件站点**（HTML + CSS + 原生 JS），无服务端、无数据库、无用户账户体系。安全策略覆盖：
 
-- 仓库中的站点代码与数据内容（`index.html`、`DGX-SPARK-HUB-OFFLINE.html`、`DGX-SPARK-HUB.html`、`DGX-SPARK-DATA.js`）
+- 仓库中的站点代码与数据内容（`index.html`、`DGX-SPARK-HUB-OFFLINE.html`）
 - GitHub Pages 部署流水线（`.github/workflows/`）
 - 文档内容中引用的外部链接
 

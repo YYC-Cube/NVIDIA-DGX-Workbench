@@ -127,9 +127,7 @@ NVIDIA DGX Spark / GB10 桌面级 AI 超算的**全链路操作指南平台**。
 ```
 nvidia-workbench/
 ├── index.html                  # 部署入口（单文件离线版，内联全部数据与样式）
-├── DGX-SPARK-HUB-OFFLINE.html  # 离线版源文件（零依赖，可直接双击运行）
-├── DGX-SPARK-HUB.html          # 在线版（引用 DGX-SPARK-DATA.js 分离数据）
-├── DGX-SPARK-DATA.js           # 数据文件（GUIDES 指南 + SKILLS 技能）
+├── DGX-SPARK-HUB-OFFLINE.html  # 数据源文件（零依赖，可直接双击运行）
 ├── README.md                   # 项目总览与开发者文档（本文件）
 ├── CONTRIBUTING.md             # 贡献指南：开发流程 / 数据规范 / 提交与 PR 规范
 ├── CHANGELOG.md                # 变更日志（Keep a Changelog 格式）
@@ -148,9 +146,8 @@ nvidia-workbench/
 
 | 文件 | 类型 | 说明 |
 | ------ | ------ | ------ |
-| `index.html` | 部署入口 | GitHub Pages 默认入口，基于离线版构建，内联全部数据 |
-| `DGX-SPARK-HUB.html` + `DGX-SPARK-DATA.js` | 在线分离版 | 数据与页面分离，便于独立维护数据 |
-| `DGX-SPARK-HUB-OFFLINE.html` | 单文件归档 | 全量内联，适合离线分发/本地存档 |
+| `DGX-SPARK-HUB-OFFLINE.html` | **唯一数据源** | 全量内联 `GUIDES` / `SKILLS` 数组，所有数据变更在此维护 |
+| `index.html` | 部署入口 | GitHub Pages 默认入口，由数据源逐字节复制生成（`cp DGX-SPARK-HUB-OFFLINE.html index.html`） |
 
 ---
 
@@ -328,11 +325,9 @@ curl -I https://nvidia-workbench.yyc3.vip  # 期望 HTTP/2 200
 
 ## 数据维护指南
 
-### 数据文件结构
+### 数据文件结构（单一数据源）
 
-**线上部署数据**（`index.html` 内联）：线上站点渲染的是 `index.html` 中的内联 `GUIDES` 数组（206 条指南 + 105 条技能 + 157 外部链接），数据与 `DGX-SPARK-HUB-OFFLINE.html` 一致。
-
-**在线版数据**（`DGX-SPARK-DATA.js`，知识图谱子集 24 条）：
+全部内容数据维护在 `DGX-SPARK-HUB-OFFLINE.html` 内联的 `GUIDES` / `SKILLS` 数组中（206 条指南 + 105 条技能 + 157 外部链接），`index.html` 为其逐字节一致的部署副本。字段结构：
 
 ```js
 var GUIDES = [
@@ -364,13 +359,9 @@ var GUIDES = [
 ];
 ```
 
-### 离线版数据
-
-`index.html` / `DGX-SPARK-HUB-OFFLINE.html` 的 `GUIDES` 数组内联在 `<script>` 标签中，结构同上。
-
 ### 新增一条指南
 
-> ⚠️ **线上对齐原则**：`index.html` 是 GitHub Pages 的唯一部署入口，新增/修改数据**必须**同步更新 `index.html` 与 `DGX-SPARK-HUB-OFFLINE.html`，并 `git push main` 触发自动构建。
+> ⚠️ **单一数据源原则**：数据只在 `DGX-SPARK-HUB-OFFLINE.html` 中维护，改完必须执行 `cp DGX-SPARK-HUB-OFFLINE.html index.html` 同步部署入口，再 `git push main` 触发自动构建。
 
 1. 在 `GUIDES` 数组中追加对象，保证 `id` 唯一、`order` 不重复
 2. 分类 key 需在 `getCategoryLabels()` / `getCategoryColors()` 中注册（若为新分类）
@@ -446,13 +437,10 @@ var GUIDES = [
 ### 常见问题（FAQ）
 
 **Q: 为什么需要 index.html 和 OFFLINE 版两个文件？**
-A: `index.html` 是 GitHub Pages 的默认入口文件（线上渲染唯一来源），`DGX-SPARK-HUB-OFFLINE.html` 是带独立命名的离线归档源文件，两者内容一致，更新时需同步。
+A: `DGX-SPARK-HUB-OFFLINE.html` 是唯一的数据维护源（独立命名、可直接双击离线运行），`index.html` 是 GitHub Pages 的默认入口文件（线上渲染唯一来源），后者由前者复制生成，两者内容保持一致。
 
 **Q: 修改数据后线上不生效？**
 A: 确认修改的是仓库 `main` 分支根目录的 `index.html`，然后 `git push` 触发 GitHub Actions workflow 自动重新构建（约 1 分钟）。可用 `gh run list --repo YYC-Cube/NVIDIA-DGX-Workbench` 查看构建状态。
-
-**Q: 为什么在线版（DGX-SPARK-HUB.html）数据比线上少？**
-A: `DGX-SPARK-DATA.js` 仅含 AI 资源矩阵知识图谱子集（24 条），而 `index.html` 部署的是全量离线版（206 条指南 + 105 技能）。线上以 `index.html` 为准。
 
 **Q: 浏览器控制台报 `var(--mono)` 未定义？**
 A: 该错误已修复，统一使用 `var(--font-mono)`。如遇自定义样式，请检查 CSS 变量名拼写。
