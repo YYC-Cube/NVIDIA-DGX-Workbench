@@ -5,14 +5,18 @@
 
 ## [Unreleased]
 
+## [0.4.0] - 2026-08-19
+
 ### Changed
 
 - **docs**：基于开源社区标准新增开发者文档体系 —— [CONTRIBUTING.md](CONTRIBUTING.md)（贡献指南）、[SECURITY.md](SECURITY.md)（安全策略）、[.editorconfig](.editorconfig)（编辑器规范）
-- **docs**：新增 [LICENSE](LICENSE)（版权声明），README 同步更新项目结构与文档导航
+- **license**：许可证由"保留所有权利"变更为 **MIT License** —— 允许任何个人或组织复制、修改、分发、再许可与商业使用（含机器学习训练用途），仅需保留版权与许可声明；未授予任何商标权
+- **docs**：README 同步更新项目结构与文档导航
 
 ### Removed
 
-- **chore**：移除与站点项目无关的本地运维脚本 `clean-dsstore.sh`、`ngc_health_check.sh`、`sudo-ops-summary.sh`（其中包含内网拓扑等敏感运维信息，且会被 Pages 流水线整体发布至公网）
+- **chore**：移除与站点项目无关的本地运维脚本 `clean-dsstore.sh`、`ngc_health_check.sh`、`sudo-ops-summary.sh`（含内网拓扑等敏感信息，且被 Pages 流水线整体发布至公网）
+- **chore**：移除过时的在线分离版 `DGX-SPARK-HUB.html` + `DGX-SPARK-DATA.js`（仅含 24 条知识图谱子集数据，落后于全量版），数据源收敛为 `DGX-SPARK-HUB-OFFLINE.html` → `index.html` 单一链路
 
 ## [0.3.0] - 2026-08-18
 
@@ -43,7 +47,8 @@
   - 进度追踪（localStorage 持久化）、全局搜索、进度导入导出、深浅主题、响应式布局
   - 在线分离版（`DGX-SPARK-HUB.html` + `DGX-SPARK-DATA.js`）与离线归档版（`DGX-SPARK-HUB-OFFLINE.html`）
 
-[Unreleased]: https://github.com/YYC-Cube/NVIDIA-DGX-Workbench/compare/v0.3.0...HEAD
+[Unreleased]: https://github.com/YYC-Cube/NVIDIA-DGX-Workbench/compare/v0.4.0...HEAD
+[0.4.0]: https://github.com/YYC-Cube/NVIDIA-DGX-Workbench/compare/v0.3.0...v0.4.0
 [0.3.0]: https://github.com/YYC-Cube/NVIDIA-DGX-Workbench/compare/v0.2.0...v0.3.0
 [0.2.0]: https://github.com/YYC-Cube/NVIDIA-DGX-Workbench/compare/v0.1.1...v0.2.0
 [0.1.1]: https://github.com/YYC-Cube/NVIDIA-DGX-Workbench/commits/v0.1.0

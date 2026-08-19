@@ -455,12 +455,15 @@ A: 该错误已修复，统一使用 `var(--font-mono)`。如遇自定义样式�
 | [CONTRIBUTING.md](CONTRIBUTING.md) | 贡献指南：开发流程 / 数据规范 / 提交与 PR 规范 |
 | [CHANGELOG.md](CHANGELOG.md) | 变更日志：版本历史与显著变更 |
 | [SECURITY.md](SECURITY.md) | 安全策略：漏洞报告渠道与内容红线 |
-| [LICENSE](LICENSE) | 版权与授权条款（保留所有权利） |
+| [LICENSE](LICENSE) | MIT 许可证 |
 
 ---
 
 ## 许可证
 
-© 2025-2026 YYC³ (YanYuCloudCube™) · NVIDIA DGX Workbench 操作中心
+本项目基于 [MIT License](LICENSE) 开源发布：
 
-本项目站点代码与内容归 YYC³ 所有，详见 [LICENSE](LICENSE)。涉及的 NVIDIA 品牌、模型名称与第三方链接版权归其各自所有者。示例代码仅供学习参考，生产环境请遵循官方文档与安全规范。
+- ✅ 任何人可自由**复制、转载、摘编、修改、分发、再许可及商业销售**本仓库的站点代码与文档内容（全部或部分），亦可用于**机器学习训练数据集**等任何用途
+- ℹ️ 唯一条件：分发时保留原版权声明与许可声明（即随附 `LICENSE` 文件）
+- 🚫 未授予任何商标权：NVIDIA、DGX Spark、GB10、NIM、NGC 等 NVIDIA 商标归 NVIDIA Corporation 所有；本项目为非官方社区项目，与 NVIDIA Corporation 无从属或背书关系，衍生分发不得暗示获得 NVIDIA 或 YYC³ 官方背书
+- ⚠️ 内容按"原样"提供，不附带任何保证；生产环境部署请自行验证并遵循官方文档与安全规范

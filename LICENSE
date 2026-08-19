@@ -1,23 +1,21 @@
-版权所有 (c) 2025-2026 YYC³ (YanYuCloudCube™)
+MIT License
 
-保留所有权利（All Rights Reserved）。
+Copyright (c) 2025-2026 YYC³ (YanYuCloudCube™)
 
-未经 YYC³ 事先书面许可，任何单位或个人不得以任何形式复制、转载、
-摘编、修改、分发、再许可或销售本仓库中的站点代码与文档内容的全部
-或部分，亦不得将其用于构建机器学习训练数据集或其他商业用途。
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
 
-获得 YYC³ 书面许可的情况下，复制或分发本仓库内容须保留本许可证
-声明及上述版权信息。
+The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.
 
-本仓库"按原样"提供，不附带任何明示或默示的保证，包括但不限于
-适销性、特定用途适用性及不侵权的保证。在任何情况下，作者或版权
-持有人均不对因使用本仓库内容而产生的任何索赔、损害或其他责任
-承担责任。
-
-────────────────────────────────────────────────────────────────
-
-商标声明：NVIDIA、DGX Spark、GB10、NIM、NGC 及文中提及的其他
-NVIDIA 产品名称均为 NVIDIA Corporation 的商标或注册商标，其权利
-归 NVIDIA Corporation 所有。本仓库为非官方的社区操作指南项目，
-与 NVIDIA Corporation 无从属或背书关系。其他第三方名称与链接归
-其各自所有者所有。
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+SOFTWARE.
