@@ -3,7 +3,9 @@
 > **DGX Spark 操作中心** · YYC³ (YanYuCloudCube™)
 > 在线访问：[https://nvidia-workbench.yyc3.vip](https://nvidia-workbench.yyc3.vip)
 
-NVIDIA DGX Spark / GB10 桌面级 AI 超算的**全链路操作指南平台**。涵盖入门配置、推理引擎、模型微调、集群互联、模型量化、AI 应用、数据科学、开发工具与安全沙箱等 9 大核心领域，并集成 NVIDIA 官方资源、NIM 模型库（138 款）与 AI 资源矩阵知识图谱（900+ 资源）。
+**Languages / 文档语言**：**简体中文**（本文件） · [English](README.en.md)
+
+NVIDIA DGX Spark / GB10 桌面级 AI 超算的**全链路操作指南平台**。涵盖入门配置、推理引擎、模型微调、集群互联、模型量化、AI 应用、数据科学、开发工具与安全沙箱等 9 大核心领域，并集成 NVIDIA 官方资源、NIM 模型库（138 款）与 AI 资源矩阵知识图谱（900+ 资源）。**站点界面内置中英双语支持（离线可用，一键切换）。**
 
 ---
 
@@ -128,11 +130,12 @@ NVIDIA DGX Spark / GB10 桌面级 AI 超算的**全链路操作指南平台**。
 nvidia-workbench/
 ├── index.html                  # 部署入口（单文件离线版，内联全部数据与样式）
 ├── DGX-SPARK-HUB-OFFLINE.html  # 数据源文件（零依赖，可直接双击运行）
-├── README.md                   # 项目总览与开发者文档（本文件）
+├── README.md                   # 项目总览与开发者文档（本文件，中文）
+├── README.en.md                # 英文版项目文档（English documentation）
 ├── CONTRIBUTING.md             # 贡献指南：开发流程 / 数据规范 / 提交与 PR 规范
 ├── CHANGELOG.md                # 变更日志（Keep a Changelog 格式）
 ├── SECURITY.md                 # 安全策略：漏洞报告渠道与内容红线
-├── LICENSE                     # 版权声明（保留所有权利）
+├── LICENSE                     # 版权声明（MIT）
 ├── .editorconfig               # 编辑器基础规范（UTF-8 / LF / 2 空格缩进）
 ├── AI-资源矩阵-统一知识图谱.md  # 数据源文档：900+ 资源分类归档
 ├── NVIDIA-NIM-全量模型-分析报告.md  # 数据源文档：138 款 NIM 模型分析
@@ -173,7 +176,8 @@ nvidia-workbench/
 - 🔍 **全局搜索**：侧边栏 + 顶栏双搜索入口
 - 📤 **进度导入/导出**：JSON 格式，支持迁移与备份
 - 🎨 **深色/浅色主题**：一键切换，本地持久记忆
-- 📱 **响应式布局**：768px 断点移动端适配
+- 🌐 **中英双语界面**：顶栏一键切换，词典完全内联零网络请求，离线环境可用；语言偏好 localStorage 持久化
+- ♿ **无障碍与响应式**：键盘焦点环、`prefers-reduced-motion` 支持、768px/480px 双断点移动端适配
 
 ---
 
@@ -425,6 +429,49 @@ var GUIDES = [
 | `guide-done-{id}` | 指南完成状态（'1' / '0'） |
 | `step-done-{id}-{n}` | 步骤完成状态 |
 | `step-open-{id}-{n}` | 步骤展开状态 |
+| `theme` | 界面主题（'dark' / 'light'） |
+| `lang` | 界面语言（'zh' / 'en'） |
+
+> 所有 localStorage 读写均经 `lsGet()` / `lsSet()` 安全封装：`file://` 协议或浏览器隐私模式导致存储异常时静默降级，界面功能不受影响（仅进度不持久化）。
+
+### 多语言（i18n）开发指南
+
+站点内置**中英双语界面**，全部词典内联于 `DGX-SPARK-HUB-OFFLINE.html` 应用逻辑脚本开头的 `I18N` 常量，**零外部请求、离线可用**。
+
+#### 架构说明
+
+| 组成 | 位置 | 职责 |
+| ------ | ------ | ------ |
+| `I18N` 词典 | 应用逻辑脚本顶部 | `zh` / `en` 两个语言对象，键名一一对应（各 49 键，含 `_code`/`_label`/`docTitle` 元信息） |
+| `t(key)` | 取词函数 | 当前语言 → 中文兜底 → 返回键名本身，保证缺词不白屏 |
+| `tf(key, vars)` | 模板取词 | 填充 `{placeholder}` 占位符，如 `tf('viewAllSteps', {n: 12})` |
+| `guideTitle(g)` | 数据取词 | 英文模式优先 `g.titleEn`，缺失回退 `g.title`（中文） |
+| `applyStaticI18n()` | 静态刷新 | 刷新 `data-i18n` / `data-i18n-ph`（placeholder）/ `data-i18n-title`（title）标记的静态元素，同步 `<html lang>` 与 `<title>` |
+| `setLanguage(lang)` | 切换入口 | 持久化 → 静态刷新 → 重渲染侧边栏/仪表盘/技能面板/详情页，并恢复筛选器激活态 |
+
+#### 数据字段约定
+
+- `GUIDES[].titleEn`：英文标题。已有 70 条覆盖；**未填写的条目在英文模式下回退显示中文标题**，按需渐进补齐即可，无需一次补全
+- `desc` / `steps[].title` / `content` 等正文数据当前为中文；界面框架文案（导航、按钮、统计、提示、弹窗）已全量双语
+
+#### 如何新增一条界面文案
+
+1. 在 `I18N.zh` 与 `I18N.en` 中**同时**添加同名键（两语言键集必须一致）
+2. 动态渲染处调用 `t('key')` 或 `tf('key', {n: xxx})`
+3. 静态 HTML 处为元素添加 `data-i18n="key"`（文本）、`data-i18n-ph="key"`（输入占位符）或 `data-i18n-title="key"`（悬停提示）属性
+4. 同步执行 `cp DGX-SPARK-HUB-OFFLINE.html index.html` 后提交
+
+#### 如何新增第三种语言
+
+1. 在 `I18N` 中新增语言对象（如 `ja`），补齐全部键与 `_code` / `_label` / `docTitle`
+2. `currentLang` 初始化校验与 `setLanguage()` 白名单中加入该语言代码
+3. `getCategoryLabels()` / `renderSkillsPanel()` 的 `catNames` 按同一模式扩展对应语言分支
+
+#### 注意事项
+
+- **键集一致性**：两语言键集不一致时，英文缺失键会静默回退中文——不会报错，但会造成中英混杂，提交前建议核对
+- **占位符一致性**：`{n}` 等模板变量在两语言中必须同名同集合，否则替换后会出现字面 `{n}` 残留
+- **切换即重渲染**：语言切换会重建全部动态视图，新增渲染函数时请统一从 `t()` 取词，避免硬编码文案
 
 ### 代码规范
 
@@ -445,13 +492,20 @@ A: 确认修改的是仓库 `main` 分支根目录的 `index.html`，然后 `git
 **Q: 浏览器控制台报 `var(--mono)` 未定义？**
 A: 该错误已修复，统一使用 `var(--font-mono)`。如遇自定义样式，请检查 CSS 变量名拼写。
 
+**Q: 离线（断网 / file:// 双击打开）时语言切换可用吗？**
+A: 可用。全部词典内联在 HTML 内，切换过程零网络请求；语言偏好保存在 localStorage，下次打开自动恢复。隐私模式下存储被禁用时自动降级为会话内生效。
+
+**Q: 为什么英文模式下部分指南标题仍是中文？**
+A: 该条目数据尚未填写 `titleEn` 字段（当前 70/206 已覆盖）。系统按"英文优先、中文兜底"策略显示，可渐进补齐，不影响使用。
+
 ---
 
 ## 文档体系
 
 | 文档 | 说明 |
 | ------ | ------ |
-| [README.md](README.md) | 项目总览：架构 / 部署 / 数据维护（本文件） |
+| [README.md](README.md) | 项目总览：架构 / 部署 / 数据维护 / i18n（本文件，中文） |
+| [README.en.md](README.en.md) | English documentation: architecture, deployment, data & i18n guide |
 | [CONTRIBUTING.md](CONTRIBUTING.md) | 贡献指南：开发流程 / 数据规范 / 提交与 PR 规范 |
 | [CHANGELOG.md](CHANGELOG.md) | 变更日志：版本历史与显著变更 |
 | [SECURITY.md](SECURITY.md) | 安全策略：漏洞报告渠道与内容红线 |

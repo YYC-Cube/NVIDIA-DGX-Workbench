@@ -63,6 +63,36 @@
         background: rgba(139, 92, 246, 0.3);
         color: #fff;
       }
+      html {
+        scroll-behavior: smooth;
+      }
+      /* 键盘可达性：统一焦点环 */
+      :focus-visible {
+        outline: 2px solid var(--accent-c);
+        outline-offset: 2px;
+        border-radius: 4px;
+      }
+      /* 细滚动条（侧边栏 / 代码块） */
+      .sb-nav::-webkit-scrollbar,
+      .modal-body::-webkit-scrollbar,
+      .code-block pre::-webkit-scrollbar {
+        width: 6px;
+        height: 6px;
+      }
+      .sb-nav::-webkit-scrollbar-thumb,
+      .modal-body::-webkit-scrollbar-thumb,
+      .code-block pre::-webkit-scrollbar-thumb {
+        background: var(--border-hover);
+        border-radius: 3px;
+      }
+      .sb-nav::-webkit-scrollbar-thumb:hover,
+      .modal-body::-webkit-scrollbar-thumb:hover {
+        background: var(--accent-v);
+      }
+      .sb-nav {
+        scrollbar-width: thin;
+        scrollbar-color: var(--border-hover) transparent;
+      }
 
       /* ═══ Layout ═══ */
       .app {
@@ -427,6 +457,36 @@
       .btn-theme svg {
         width: 16px;
         height: 16px;
+      }
+      /* 语言切换按钮：图标 + 目标语言标签 */
+      .btn-lang {
+        height: 34px;
+        padding: 0 10px;
+        border-radius: 8px;
+        border: 1px solid var(--border);
+        background: var(--surface);
+        color: var(--text2);
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        gap: 5px;
+        transition: 0.2s;
+        font-size: 12px;
+        font-weight: 600;
+        font-family: var(--font-mono);
+        letter-spacing: 0.5px;
+      }
+      .btn-lang svg {
+        width: 14px;
+        height: 14px;
+      }
+      .btn-lang:hover {
+        background: var(--surface-hover);
+        color: var(--accent-c);
+        border-color: rgba(6, 182, 212, 0.35);
+      }
+      .btn-lang:active {
+        transform: scale(0.95);
       }
       .progress-actions {
         display: flex;
@@ -1462,7 +1522,8 @@
           grid-template-columns: 1fr;
         }
         .topbar {
-          padding: 10px 16px;
+          padding: 10px 12px;
+          gap: 8px;
         }
         .sb-overlay {
           position: fixed;
@@ -1478,6 +1539,69 @@
           flex: 1;
           min-width: 100px;
         }
+        /* 顶栏移动端瘦身：隐藏时钟与副标题，标题截断省略 */
+        .topbar-time,
+        .topbar-subtitle {
+          display: none;
+        }
+        .topbar > div:first-of-type {
+          min-width: 0;
+          flex-shrink: 1;
+        }
+        .topbar-title {
+          font-size: 15px;
+          white-space: nowrap;
+          overflow: hidden;
+          text-overflow: ellipsis;
+          max-width: 42vw;
+        }
+        .topbar-actions {
+          gap: 4px;
+          flex-shrink: 0;
+        }
+        .progress-actions {
+          gap: 2px;
+        }
+        .btn-lang {
+          padding: 0 7px;
+        }
+      }
+      /* 窄屏（手机竖屏）：分享按钮让位，仅保留核心操作 */
+      @media (max-width: 480px) {
+        .btn-share {
+          display: none;
+        }
+        .topbar-search {
+          max-width: none;
+        }
+        .dash-stats {
+          gap: 8px;
+        }
+        .filter-bar {
+          gap: 6px;
+        }
+      }
+      /* 触屏点击目标加大 */
+      @media (hover: none) and (pointer: coarse) {
+        .btn-action,
+        .modal-close,
+        .copy-btn {
+          min-width: 36px;
+          min-height: 36px;
+        }
+      }
+      /* 无障碍：用户偏好减少动效时关闭动画与平滑滚动 */
+      @media (prefers-reduced-motion: reduce) {
+        html {
+          scroll-behavior: auto;
+        }
+        *,
+        *::before,
+        *::after {
+          animation-duration: 0.01ms !important;
+          animation-iteration-count: 1 !important;
+          transition-duration: 0.01ms !important;
+        }
       }
     </style>
   </head>
@@ -1490,8 +1614,8 @@
           <a class="sb-logo" href="#" onclick="showDashboard()">
             <div class="sb-logo-icon">D</div>
             <div>
-              <div class="sb-logo-text">DGX Spark 操作中心</div>
-              <div class="sb-logo-sub">YYC³ · NVIDIA 集成</div>
+              <div class="sb-logo-text" data-i18n="sbLogoText">DGX Spark 操作中心</div>
+              <div class="sb-logo-sub" data-i18n="sbLogoSub">YYC³ · NVIDIA 集成</div>
             </div>
           </a>
         </div>
@@ -1500,12 +1624,12 @@
             <circle cx="11" cy="11" r="8" />
             <path d="m21 21-4.35-4.35" />
           </svg>
-          <input type="text" id="sbSearchInput" placeholder="搜索指南..." oninput="filterSidebar(this.value)" />
+          <input type="text" id="sbSearchInput" data-i18n-ph="searchPlaceholder" placeholder="搜索指南..." oninput="filterSidebar(this.value)" />
         </div>
         <!-- Sidebar Progress Bar -->
         <div class="sb-progress" id="sbProgress">
           <div class="sb-progress-header">
-            <span class="sb-progress-label">总体进度</span>
+            <span class="sb-progress-label" data-i18n="overallProgress">总体进度</span>
             <span class="sb-progress-pct" id="sbProgressPct">0%</span>
           </div>
           <div class="sb-progress-bar">
@@ -1516,7 +1640,7 @@
         <nav class="sb-nav" id="sbNav">
           <div class="loading">
             <div class="spinner"></div>
-            <p>加载指南数据...</p>
+            <p data-i18n="loadingGuides">加载指南数据...</p>
           </div>
         </nav>
       </aside>
@@ -1534,7 +1658,7 @@
           </div>
           <div class="topbar-search">
             <span class="ts-icon">🔍</span>
-            <input type="text" id="topbarSearchInput" placeholder="搜索指南…" oninput="topbarSearch(this.value)" />
+            <input type="text" id="topbarSearchInput" data-i18n-ph="searchPlaceholder" placeholder="搜索指南…" oninput="topbarSearch(this.value)" />
           </div>
           <div class="topbar-spacer"></div>
           <div class="topbar-time" id="topbarClock">
@@ -1542,7 +1666,7 @@
             <span id="clockDisplay">--:--:--</span>
           </div>
           <div class="topbar-actions">
-            <button class="btn-share" onclick="sharePage()" title="分享当前页面">
+            <button class="btn-share" onclick="sharePage()" data-i18n-title="share" title="分享当前页面">
               <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                 <circle cx="18" cy="5" r="3" />
                 <circle cx="6" cy="12" r="3" />
@@ -1552,28 +1676,36 @@
               </svg>
             </button>
             <div class="progress-actions">
-              <button class="btn-action" onclick="exportProgress()" title="导出进度">
+              <button class="btn-action" onclick="exportProgress()" data-i18n-title="export" title="导出进度">
                 <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                   <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
                   <polyline points="7 10 12 15 17 10" />
                   <line x1="12" y1="15" x2="12" y2="3" />
                 </svg>
               </button>
-              <button class="btn-action" onclick="importProgress()" title="导入进度">
+              <button class="btn-action" onclick="importProgress()" data-i18n-title="import" title="导入进度">
                 <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                   <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
                   <polyline points="17 8 12 3 7 8" />
                   <line x1="12" y1="3" x2="12" y2="15" />
                 </svg>
               </button>
-              <button class="btn-action btn-danger" onclick="resetProgress()" title="重置进度">
+              <button class="btn-action btn-danger" onclick="resetProgress()" data-i18n-title="reset" title="重置进度">
                 <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                   <polyline points="23 4 23 10 17 10" />
                   <path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10" />
                 </svg>
               </button>
             </div>
-            <button class="btn-theme" onclick="toggleTheme()" aria-label="切换主题">
+            <button class="btn-lang" onclick="toggleLang()" data-i18n-title="toggleLang" title="切换语言 / Switch language" aria-label="切换语言 / Switch language">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <circle cx="12" cy="12" r="10" />
+                <line x1="2" y1="12" x2="22" y2="12" />
+                <path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z" />
+              </svg>
+              <span id="langLabel">EN</span>
+            </button>
+            <button class="btn-theme" onclick="toggleTheme()" data-i18n-title="toggleTheme" aria-label="切换主题">
               <svg id="themeIcon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                 <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z" />
               </svg>
@@ -1589,8 +1721,8 @@
               </svg>
               <span id="guideCount">加载中...</span>
             </div>
-            <h1 class="dash-title">NVIDIA DGX Spark 操作中心</h1>
-            <p class="dash-desc">
+            <h1 class="dash-title" data-i18n="dashTitle">NVIDIA DGX Spark 操作中心</h1>
+            <p class="dash-desc" data-i18n="dashDesc">
               从入门配置到集群互联，从推理引擎到模型微调 — 涵盖 DGX Spark 全链路操作指南与 NVIDIA 官方集成方案。
             </p>
             <div class="dash-stats" id="dashStats"></div>
@@ -1599,7 +1731,7 @@
           <div id="dashboardContent">
             <div class="loading">
               <div class="spinner"></div>
-              <p>加载指南数据...</p>
+              <p data-i18n="loadingGuides">加载指南数据...</p>
             </div>
           </div>
           <div class="skills-panel" id="skillsPanel"></div>
@@ -7906,6 +8038,220 @@
       let currentFilter = 'all';
       let searchQuery = '';
 
+      /* ═══ i18n · 离线双语（zh / en）═══ */
+      const I18N = {
+        zh: {
+          _code: 'zh-CN',
+          _label: '中',
+          docTitle: 'DGX Spark 操作中心 · YYC³',
+          /* 侧边栏 */
+          sbLogoText: 'DGX Spark 操作中心',
+          sbLogoSub: 'YYC³ · NVIDIA 集成',
+          searchPlaceholder: '搜索指南...',
+          overallProgress: '总体进度',
+          progressCount: '{done} / {total} 已完成',
+          loadingGuides: '加载指南数据...',
+          /* 顶栏 */
+          topbarTitle: 'DGX Spark 操作中心',
+          topbarSubtitle: 'NVIDIA 官方集成操作指南',
+          share: '分享当前页面',
+          linkCopied: '已复制链接',
+          export: '导出进度',
+          import: '导入进度',
+          reset: '重置进度',
+          toggleTheme: '切换主题',
+          toggleLang: '切换语言 / Switch language',
+          /* 仪表盘 */
+          dashTitle: 'NVIDIA DGX Spark 操作中心',
+          dashDesc: '从入门配置到集群互联，从推理引擎到模型微调 — 涵盖 DGX Spark 全链路操作指南与 NVIDIA 官方集成方案。',
+          guideCountLabel: '{n} 篇操作指南',
+          statAll: '全部指南',
+          statCats: '分类',
+          statDone: '已完成',
+          filterAll: '🏠 全部',
+          catCount: '{n} 篇',
+          catDoneOf: '{done}/{total} 完成',
+          diffEasy: '⭐ 简单',
+          diffMedium: '⭐⭐ 中等',
+          diffHard: '⭐⭐⭐ 高',
+          externalLink: '🔗 外部链接',
+          localFile: '本地文件',
+          stepsLabel: '⚡ 操作步骤',
+          viewAllSteps: '查看全部 {n} 步 →',
+          /* 技能库 */
+          skillsCount: '{n} 条 NVIDIA Skills',
+          skillsTitle: '🧰 NVIDIA Skills — 智能体技能库',
+          skillsDesc: '通过 <code>npx skills add</code> 一键安装 NVIDIA 官方智能体技能，覆盖 21 个领域共 {n} 条技能。',
+          skillsEmpty: '🔍 未找到匹配的技能条目',
+          skillsItemCount: '{n} 条',
+          /* 指南详情 */
+          back: '← 返回操作中心',
+          prereqTitle: '📋 前置条件',
+          progressTitle: '📊 进度',
+          progressText: '{done}/{total} 步 ({pct}%)',
+          copy: '📋 复制',
+          copied: '✅ 已复制',
+          modalTitleSuffix: '— 步骤预览',
+          stepDoneLabel: '· ✅ 已完成',
+          /* 弹窗与提示 */
+          importSuccess: '✅ 进度导入成功！',
+          importFail: '❌ 导入失败：',
+          invalidFormat: '无效格式',
+          resetConfirm: '确定重置所有进度？此操作不可撤销。',
+        },
+        en: {
+          _code: 'en',
+          _label: 'EN',
+          docTitle: 'DGX Spark Hub · YYC³',
+          /* Sidebar */
+          sbLogoText: 'DGX Spark Hub',
+          sbLogoSub: 'YYC³ · NVIDIA Integrated',
+          searchPlaceholder: 'Search guides...',
+          overallProgress: 'Overall Progress',
+          progressCount: '{done} / {total} done',
+          loadingGuides: 'Loading guides...',
+          /* Topbar */
+          topbarTitle: 'DGX Spark Hub',
+          topbarSubtitle: 'NVIDIA Official Integration Guides',
+          share: 'Share this page',
+          linkCopied: 'Link copied',
+          export: 'Export progress',
+          import: 'Import progress',
+          reset: 'Reset progress',
+          toggleTheme: 'Toggle theme',
+          toggleLang: '切换语言 / Switch language',
+          /* Dashboard */
+          dashTitle: 'NVIDIA DGX Spark Hub',
+          dashDesc: 'From first-time setup to cluster interconnect, inference engines to model fine-tuning — the full DGX Spark playbook plus official NVIDIA integrations.',
+          guideCountLabel: '{n} guides',
+          statAll: 'Guides',
+          statCats: 'Categories',
+          statDone: 'Completed',
+          filterAll: '🏠 All',
+          catCount: '{n} items',
+          catDoneOf: '{done}/{total} done',
+          diffEasy: '⭐ Easy',
+          diffMedium: '⭐⭐ Medium',
+          diffHard: '⭐⭐⭐ Advanced',
+          externalLink: '🔗 External',
+          localFile: 'Local file',
+          stepsLabel: '⚡ Steps',
+          viewAllSteps: 'View all {n} steps →',
+          /* Skills */
+          skillsCount: '{n} NVIDIA Skills',
+          skillsTitle: '🧰 NVIDIA Skills — Agent Skill Library',
+          skillsDesc: 'Install official NVIDIA agent skills with a single <code>npx skills add</code> command — {n} skills across 21 domains.',
+          skillsEmpty: '🔍 No matching skills found',
+          skillsItemCount: '{n} items',
+          /* Guide detail */
+          back: '← Back to Hub',
+          prereqTitle: '📋 Prerequisites',
+          progressTitle: '📊 Progress',
+          progressText: '{done}/{total} steps ({pct}%)',
+          copy: '📋 Copy',
+          copied: '✅ Copied',
+          modalTitleSuffix: '— Steps',
+          stepDoneLabel: '· ✅ Done',
+          /* Dialogs */
+          importSuccess: '✅ Progress imported successfully!',
+          importFail: '❌ Import failed: ',
+          invalidFormat: 'Invalid format',
+          resetConfirm: 'Reset all progress? This cannot be undone.',
+        },
+      };
+
+      /* localStorage 安全读写（file:// / 隐私模式兜底） */
+      function lsGet(key) {
+        try {
+          return localStorage.getItem(key);
+        } catch (e) {
+          return null;
+        }
+      }
+      function lsSet(key, val) {
+        try {
+          localStorage.setItem(key, val);
+        } catch (e) {
+          /* 静默失败：隐私模式下进度不持久化，但界面功能不受影响 */
+        }
+      }
+
+      let currentLang = (function () {
+        const saved = lsGet('lang');
+        return saved === 'en' || saved === 'zh' ? saved : 'zh';
+      })();
+
+      /* 取词：当前语言 → 中文兜底 → 键名 */
+      function t(key) {
+        return (I18N[currentLang] && I18N[currentLang][key]) || I18N.zh[key] || key;
+      }
+      /* 取词并填充 {placeholder} */
+      function tf(key, vars) {
+        let s = t(key);
+        Object.keys(vars || {}).forEach((k) => {
+          s = s.split('{' + k + '}').join(String(vars[k]));
+        });
+        return s;
+      }
+      /* 指南标题：英文模式优先 titleEn，缺失回退中文 */
+      function guideTitle(g) {
+        if (!g) return '';
+        return currentLang === 'en' && g.titleEn ? g.titleEn : g.title;
+      }
+      /* 难度标签 */
+      function diffLabel(d) {
+        if (d === 'easy') return t('diffEasy');
+        if (d === 'medium') return t('diffMedium');
+        return t('diffHard');
+      }
+
+      /* 静态文案刷新：data-i18n / data-i18n-ph(placeholder) / data-i18n-title(title) */
+      function applyStaticI18n() {
+        document.documentElement.lang = t('_code');
+        document.title = t('docTitle');
+        document.querySelectorAll('[data-i18n]').forEach((el) => {
+          el.innerHTML = t(el.getAttribute('data-i18n'));
+        });
+        document.querySelectorAll('[data-i18n-ph]').forEach((el) => {
+          el.placeholder = t(el.getAttribute('data-i18n-ph'));
+        });
+        document.querySelectorAll('[data-i18n-title]').forEach((el) => {
+          el.title = t(el.getAttribute('data-i18n-title'));
+        });
+        const langLabel = document.getElementById('langLabel');
+        if (langLabel) langLabel.textContent = currentLang === 'zh' ? 'EN' : '中';
+      }
+
+      function setLanguage(lang) {
+        if (lang !== 'zh' && lang !== 'en') return;
+        currentLang = lang;
+        lsSet('lang', lang);
+        applyStaticI18n();
+        /* 动态区域整体重渲染 */
+        if (typeof GUIDES !== 'undefined' && GUIDES && GUIDES.length) {
+          buildSidebar();
+          renderDashboard();
+          const sp = document.getElementById('skillsPanel');
+          if (sp && sp.innerHTML !== '') renderSkillsPanel();
+          if (currentGuide) {
+            showGuide(currentGuide.id);
+            return;
+          }
+        }
+        /* 恢复筛选按钮激活态（renderDashboard 会重置为 all） */
+        if (currentFilter !== 'all') {
+          const btn = document.querySelector('.filter-btn[data-cat="' + currentFilter + '"]');
+          if (btn) btn.click();
+        } else {
+          document.getElementById('topbarTitle').textContent = t('topbarTitle');
+          document.getElementById('topbarSubtitle').textContent = t('topbarSubtitle');
+        }
+      }
+
+      function toggleLang() {
+        setLanguage(currentLang === 'zh' ? 'en' : 'zh');
+      }
+
       /* ═══ Theme ═══ */
       function toggleTheme() {
         const isLight = document.documentElement.classList.toggle('light');
@@ -7916,10 +8262,10 @@
         } else {
           icon.innerHTML = '<path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/>';
         }
-        localStorage.setItem('theme', isLight ? 'light' : 'dark');
+        lsSet('theme', isLight ? 'light' : 'dark');
       }
       function initTheme() {
-        if (localStorage.getItem('theme') === 'light') toggleTheme();
+        if (lsGet('theme') === 'light') toggleTheme();
       }
       initTheme();
 
@@ -7948,13 +8294,13 @@
             if (g.type === 'external') {
               html += `<a class="sb-item" href="${escHtml(g.externalUrl)}" target="_blank" rel="noopener" data-id="${g.id}">
         <span class="sb-dot ext"></span>
-        <span class="sb-label">${g.order}. ${g.title}</span>
+        <span class="sb-label">${g.order}. ${guideTitle(g)}</span>
         <span class="sb-order">↗</span>
       </a>`;
             } else {
               html += `<a class="sb-item" href="#" onclick="showGuide('${g.id}')" data-id="${g.id}">
         <span class="sb-dot ${done ? 'done' : ''}"></span>
-        <span class="sb-label">${g.order}. ${g.title}</span>
+        <span class="sb-label">${g.order}. ${guideTitle(g)}</span>
         <span class="sb-order">${diffIcon(g.diff)}</span>
       </a>`;
             }
@@ -8034,10 +8380,10 @@
             const orig = btn.innerHTML;
             btn.innerHTML =
               '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg>';
-            btn.title = '已复制链接';
+            btn.title = t('linkCopied');
             setTimeout(() => {
               btn.innerHTML = orig;
-              btn.title = '分享当前页面';
+              btn.title = t('share');
             }, 2000);
           });
         }
@@ -8048,14 +8394,34 @@
         document.getElementById('guideDetail').classList.remove('active');
         document.getElementById('guideDetail').style.display = 'none';
         document.getElementById('dashboardView').style.display = 'block';
-        document.getElementById('topbarTitle').textContent = 'DGX Spark 操作中心';
-        document.getElementById('topbarSubtitle').textContent = 'NVIDIA 官方集成操作指南';
+        document.getElementById('topbarTitle').textContent = t('topbarTitle');
+        document.getElementById('topbarSubtitle').textContent = t('topbarSubtitle');
         window.location.hash = '';
         currentGuide = null;
         document.querySelectorAll('.sb-item').forEach((el) => el.classList.remove('active'));
       }
 
       function getCategoryLabels() {
+        if (currentLang === 'en') {
+          return {
+            'getting-started': '🚀 Getting Started',
+            inference: '⚡ Inference Engines',
+            finetuning: '🎯 Fine-tuning',
+            cluster: '🔗 Cluster Interconnect',
+            quantization: '📉 Quantization',
+            'ai-application': '🤖 AI Applications',
+            'data-science': '📊 Data Science',
+            development: '🛠️ Dev Tools',
+            security: '🛡️ Security Sandbox',
+            'github-repos': '📦 GitHub Repos',
+            'nvidia-docs': '📘 NVIDIA Official Docs',
+            'mid-term': '🔶 Mid-term Optional',
+            'nvidia-resources': '🗺️ AI Resource Matrix',
+            'nim-models': '🧠 NIM Models',
+            'yyc3-ops': '🔧 YYC3 Ops',
+            skills: '🧰 NVIDIA Skills',
+          };
+        }
         return {
           'getting-started': '🚀 入门配置',
           inference: '⚡ 推理引擎',
@@ -8103,17 +8469,17 @@
         const catColors = getCategoryColors();
 
         // Stats
-        document.getElementById('guideCount').textContent = GUIDES.length + ' 篇操作指南';
+        document.getElementById('guideCount').textContent = tf('guideCountLabel', { n: GUIDES.length });
         const doneCount = GUIDES.filter((g) => localStorage.getItem('guide-done-' + g.id) === '1').length;
         const cats = [...new Set(GUIDES.map((g) => g.cat))];
         document.getElementById('dashStats').innerHTML = `
-    <div class="stat-card"><span class="stat-num">${GUIDES.length}</span><span class="stat-label">全部指南</span></div>
-    <div class="stat-card"><span class="stat-num">${cats.length}</span><span class="stat-label">分类</span></div>
-    <div class="stat-card"><span class="stat-num">${doneCount}</span><span class="stat-label">已完成</span></div>
+    <div class="stat-card"><span class="stat-num">${GUIDES.length}</span><span class="stat-label">${t('statAll')}</span></div>
+    <div class="stat-card"><span class="stat-num">${cats.length}</span><span class="stat-label">${t('statCats')}</span></div>
+    <div class="stat-card"><span class="stat-num">${doneCount}</span><span class="stat-label">${t('statDone')}</span></div>
   `;
 
         // Filters
-        const filterHtml = `<button class="filter-btn active" data-cat="all" onclick="filterByCategory('all',this)">🏠 全部</button>
+        const filterHtml = `<button class="filter-btn active" data-cat="all" onclick="filterByCategory('all',this)">${t('filterAll')}</button>
     ${Object.entries(catLabels)
       .map(
         ([k, v]) => `<button class="filter-btn" data-cat="${k}" onclick="filterByCategory('${k}',this)">${v}</button>`
@@ -8135,8 +8501,8 @@
       <div class="cat-header">
         <span class="cat-icon">${catLabels[cat]?.split(' ')[0] || '📁'}</span>
         <span class="cat-name">${catLabels[cat] || cat}</span>
-        <span class="cat-count">${guides.length} 篇</span>
-        <span class="cat-progress" style="font-size:11px;color:var(--text3)">${catDone}/${guides.length} 完成</span>
+        <span class="cat-count">${tf('catCount', { n: guides.length })}</span>
+        <span class="cat-progress" style="font-size:11px;color:var(--text3)">${tf('catDoneOf', { done: catDone, total: guides.length })}</span>
         <div class="cat-line"></div>
       </div>
       <div class="card-grid">`;
@@ -8148,16 +8514,16 @@
         <div class="gc-head">
           <div class="gc-icon" style="background:${catColor}22">${g.icon || '🔗'}</div>
           <div class="gc-info">
-            <div class="gc-title">${g.order}. ${g.title}</div>
+            <div class="gc-title">${g.order}. ${guideTitle(g)}</div>
             <div class="gc-meta">
-              <span class="gc-tag ${g.diff}">${g.diff === 'easy' ? '⭐ 简单' : g.diff === 'medium' ? '⭐⭐ 中等' : '⭐⭐⭐ 高'}</span>
-              <span class="gc-time">🔗 外部链接</span>
+              <span class="gc-tag ${g.diff}">${diffLabel(g.diff)}</span>
+              <span class="gc-time">${t('externalLink')}</span>
             </div>
           </div>
           <span class="gc-ext-link">↗</span>
         </div>
         <div class="gc-desc">${g.desc || ''}</div>
-        <div class="gc-domain">${g.externalUrl.startsWith('http') ? new URL(g.externalUrl).hostname : '本地文件'}</div>
+        <div class="gc-domain">${g.externalUrl.startsWith('http') ? new URL(g.externalUrl).hostname : t('localFile')}</div>
       </a>`;
               return;
             }
@@ -8171,7 +8537,7 @@
             const stepsPreview =
               g.steps && g.steps.length > 0
                 ? `<div class="gc-steps">
-                  <div class="gc-steps-label">⚡ 操作步骤</div>
+                  <div class="gc-steps-label">${t('stepsLabel')}</div>
                   <div class="gc-steps-list">
                     ${g.steps
                       .slice(0, 3)
@@ -8185,7 +8551,7 @@
                       </span>`;
                       })
                       .join('')}
-                    ${g.steps.length > 3 ? `<span class="gc-step-more" onclick="event.stopPropagation();event.preventDefault();openPreviewModal('${g.id}')">查看全部 ${g.steps.length} 步 →</span>` : ''}
+                    ${g.steps.length > 3 ? `<span class="gc-step-more" onclick="event.stopPropagation();event.preventDefault();openPreviewModal('${g.id}')">${tf('viewAllSteps', { n: g.steps.length })}</span>` : ''}
                   </div>
                 </div>`
                 : '';
@@ -8195,9 +8561,9 @@
         <div class="gc-head">
           <div class="gc-icon" style="background:${catColor}22">${g.icon || '📄'}</div>
           <div class="gc-info">
-            <div class="gc-title">${g.order}. ${g.title}</div>
+            <div class="gc-title">${g.order}. ${guideTitle(g)}</div>
             <div class="gc-meta">
-              <span class="gc-tag ${g.diff}">${g.diff === 'easy' ? '⭐ 简单' : g.diff === 'medium' ? '⭐⭐ 中等' : '⭐⭐⭐ 高'}</span>
+              <span class="gc-tag ${g.diff}">${diffLabel(g.diff)}</span>
               <span class="gc-time">⏱ ${g.time || '—'}</span>
             </div>
           </div>
@@ -8237,7 +8603,7 @@
           dc.style.display = 'none';
           sp.style.display = 'block';
           ds.style.display = 'none';
-          gc.textContent = (typeof SKILLS !== 'undefined' ? SKILLS.length : 0) + ' 条 NVIDIA Skills';
+          gc.textContent = tf('skillsCount', { n: typeof SKILLS !== 'undefined' ? SKILLS.length : 0 });
           if (sp.innerHTML === '') renderSkillsPanel();
         } else {
           dc.style.display = '';
@@ -8275,29 +8641,54 @@
           groups[s.cat].push(s);
         });
 
-        const catNames = {
-          rag: ['RAG 检索增强生成', '🔍'],
-          nemoclaw: ['NemoClaw 沙箱安全生态', '🛡️'],
-          dynamo: ['Dynamo 推理服务编排', '⚙️'],
-          megatron: ['Megatron-Bridge 分布式训练', '🧠'],
-          'nemo-automodel': ['NeMo AutoModel 训练自动化', '🤖'],
-          'nemo-rl': ['NeMo-RL 强化学习', '🎮'],
-          nemotron: ['Nemotron 语音与定制', '🎤'],
-          'megatron-core': ['Megatron-Core 框架工具', '🔧'],
-          cuopt: ['cuOpt 数学优化', '📐'],
-          earth2: ['Earth2Studio 天气气候', '🌤️'],
-          holoscan: ['Holoscan 医疗设备 SDK', '🏥'],
-          deepstream: ['DeepStream 视频分析', '🎥'],
-          omniverse: ['Omniverse 3D/USD 生态', '🌐'],
-          'physical-ai': ['Physical AI 物理基础设施', '🏗️'],
-          'medical-imaging': ['医疗影像 AI', '🩻'],
-          dicom: ['DICOM 医学影像数据', '📋'],
-          'digital-health': ['数字健康 临床 ASR', '❤️'],
-          ai4science: ['AI4Science 科学计算', '🔬'],
-          'data-processing': ['数据处理与设计', '💾'],
-          'nemo-eval': ['NeMo 评估与插件', '📊'],
-          'skill-governance': ['技能治理', '🏛️'],
-        };
+        const catNames =
+          currentLang === 'en'
+            ? {
+                rag: ['RAG Retrieval-Augmented Generation', '🔍'],
+                nemoclaw: ['NemoClaw Sandbox Security', '🛡️'],
+                dynamo: ['Dynamo Inference Orchestration', '⚙️'],
+                megatron: ['Megatron-Bridge Distributed Training', '🧠'],
+                'nemo-automodel': ['NeMo AutoModel Training Automation', '🤖'],
+                'nemo-rl': ['NeMo-RL Reinforcement Learning', '🎮'],
+                nemotron: ['Nemotron Voice & Customization', '🎤'],
+                'megatron-core': ['Megatron-Core Framework Tools', '🔧'],
+                cuopt: ['cuOpt Mathematical Optimization', '📐'],
+                earth2: ['Earth2Studio Weather & Climate', '🌤️'],
+                holoscan: ['Holoscan Medical Device SDK', '🏥'],
+                deepstream: ['DeepStream Video Analytics', '🎥'],
+                omniverse: ['Omniverse 3D/USD Ecosystem', '🌐'],
+                'physical-ai': ['Physical AI Infrastructure', '🏗️'],
+                'medical-imaging': ['Medical Imaging AI', '🩻'],
+                dicom: ['DICOM Medical Imaging Data', '📋'],
+                'digital-health': ['Digital Health Clinical ASR', '❤️'],
+                ai4science: ['AI4Science Scientific Computing', '🔬'],
+                'data-processing': ['Data Processing & Design', '💾'],
+                'nemo-eval': ['NeMo Evaluation & Plugins', '📊'],
+                'skill-governance': ['Skill Governance', '🏛️'],
+              }
+            : {
+                rag: ['RAG 检索增强生成', '🔍'],
+                nemoclaw: ['NemoClaw 沙箱安全生态', '🛡️'],
+                dynamo: ['Dynamo 推理服务编排', '⚙️'],
+                megatron: ['Megatron-Bridge 分布式训练', '🧠'],
+                'nemo-automodel': ['NeMo AutoModel 训练自动化', '🤖'],
+                'nemo-rl': ['NeMo-RL 强化学习', '🎮'],
+                nemotron: ['Nemotron 语音与定制', '🎤'],
+                'megatron-core': ['Megatron-Core 框架工具', '🔧'],
+                cuopt: ['cuOpt 数学优化', '📐'],
+                earth2: ['Earth2Studio 天气气候', '🌤️'],
+                holoscan: ['Holoscan 医疗设备 SDK', '🏥'],
+                deepstream: ['DeepStream 视频分析', '🎥'],
+                omniverse: ['Omniverse 3D/USD 生态', '🌐'],
+                'physical-ai': ['Physical AI 物理基础设施', '🏗️'],
+                'medical-imaging': ['医疗影像 AI', '🩻'],
+                dicom: ['DICOM 医学影像数据', '📋'],
+                'digital-health': ['数字健康 临床 ASR', '❤️'],
+                ai4science: ['AI4Science 科学计算', '🔬'],
+                'data-processing': ['数据处理与设计', '💾'],
+                'nemo-eval': ['NeMo 评估与插件', '📊'],
+                'skill-governance': ['技能治理', '🏛️'],
+              };
 
         const skillCatColors = {
           rag: '#6366f1',
@@ -8354,10 +8745,12 @@
 
         let html =
           '<div class="dash-header" style="margin-bottom:16px"><div class="dash-badge"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"/></svg><span>' +
-          SKILLS.length +
-          ' 条 NVIDIA Skills</span></div><h1 class="dash-title" style="margin-top:8px">🧰 NVIDIA Skills — 智能体技能库</h1><p class="dash-desc">通过 <code>npx skills add</code> 一键安装 NVIDIA 官方智能体技能，覆盖 21 个领域共 ' +
-          SKILLS.length +
-          ' 条技能。</p></div>';
+          tf('skillsCount', { n: SKILLS.length }) +
+          '</span></div><h1 class="dash-title" style="margin-top:8px">' +
+          t('skillsTitle') +
+          '</h1><p class="dash-desc">' +
+          tf('skillsDesc', { n: SKILLS.length }) +
+          '</p></div>';
 
         const catOrder = Object.keys(catNames);
         Object.entries(groups)
@@ -8383,8 +8776,8 @@
               '</span><span class="sc-stars">' +
               s +
               '</span><span class="sc-count">' +
-              skills.length +
-              ' 条</span></div><div class="skills-grid">';
+              tf('skillsItemCount', { n: skills.length }) +
+              '</span></div><div class="skills-grid">';
 
             skills.forEach(function (sk) {
               var cmdS = sk.cmd.replace(/'/g, "\\'");
@@ -8441,7 +8834,7 @@
           if (!empty) {
             var e = document.createElement('div');
             e.className = 'skills-empty';
-            e.textContent = '🔍 未找到匹配的技能条目';
+            e.textContent = t('skillsEmpty');
             sp.appendChild(e);
           }
         } else if (empty) {
@@ -8477,7 +8870,7 @@
         const pct = Math.round((done / total) * 100);
         document.getElementById('sbProgressPct').textContent = pct + '%';
         document.getElementById('sbProgressFill').style.width = pct + '%';
-        document.getElementById('sbProgressCount').textContent = done + ' / ' + total + ' 已完成';
+        document.getElementById('sbProgressCount').textContent = tf('progressCount', { done: done, total: total });
       }
 
       /* ═══ Preview Modal ═══ */
@@ -8487,7 +8880,7 @@
         if (!guide || !guide.steps) return;
         const catColors = getCategoryColors();
         const catColor = catColors[guide.cat] || '#666';
-        document.getElementById('modalTitle').textContent = `${guide.icon || '📋'} ${guide.title} — 步骤预览`;
+        document.getElementById('modalTitle').textContent = `${guide.icon || '📋'} ${guideTitle(guide)} ${t('modalTitleSuffix')}`;
         const body = document.getElementById('modalBody');
         body.innerHTML = guide.steps
           .map((s) => {
@@ -8496,7 +8889,7 @@
             <div class="ms-num" style="background:${sDone ? '#22c55e' : catColor}">${sDone ? '✓' : s.n}</div>
             <div class="ms-info">
               <div class="ms-title">${s.title}</div>
-              <div class="ms-meta">⏱ ${s.time || '—'} ${sDone ? '· ✅ 已完成' : ''}</div>
+              <div class="ms-meta">⏱ ${s.time || '—'} ${sDone ? t('stepDoneLabel') : ''}</div>
             </div>
             ${sDone ? '<span class="ms-check">✓</span>' : ''}
           </div>`;
@@ -8548,7 +8941,7 @@
           reader.onload = function (ev) {
             try {
               const data = JSON.parse(ev.target.result);
-              if (!data.guides || !Array.isArray(data.guides)) throw new Error('无效格式');
+              if (!data.guides || !Array.isArray(data.guides)) throw new Error(t('invalidFormat'));
               data.guides.forEach((g) => {
                 if (g.id) {
                   localStorage.setItem('guide-done-' + g.id, g.done ? '1' : '0');
@@ -8563,9 +8956,9 @@
               renderDashboard();
               buildSidebar();
               updateSidebarProgress();
-              alert('✅ 进度导入成功！');
+              alert(t('importSuccess'));
             } catch (err) {
-              alert('❌ 导入失败：' + err.message);
+              alert(t('importFail') + err.message);
             }
           };
           reader.readAsText(file);
@@ -8574,7 +8967,7 @@
       }
 
       function resetProgress() {
-        if (!confirm('确定重置所有进度？此操作不可撤销。')) return;
+        if (!confirm(t('resetConfirm'))) return;
         if (!GUIDES) return;
         GUIDES.forEach((g) => {
           localStorage.removeItem('guide-done-' + g.id);
@@ -8600,8 +8993,9 @@
         const detail = document.getElementById('guideDetail');
         detail.style.display = 'block';
         detail.classList.add('active');
-        document.getElementById('topbarTitle').textContent = guide.title;
-        document.getElementById('topbarSubtitle').textContent = guide.titleEn || '';
+        document.getElementById('topbarTitle').textContent = guideTitle(guide);
+        document.getElementById('topbarSubtitle').textContent =
+          currentLang === 'en' ? (guide.titleEn ? guide.title : '') : guide.titleEn || '';
 
         const stepsDone = guide.steps
           ? guide.steps.filter((s) => localStorage.getItem('step-done-' + id + '-' + s.n) === '1').length
@@ -8628,7 +9022,7 @@
         <div class="step-body">
           <div class="step-body-inner">
             <div class="step-content"><p>${s.content || ''}</p></div>
-            ${s.code ? s.code.map((c) => `<div class="code-block"><div class="code-hdr"><span>${c[0]}</span><button class="copy-btn" onclick="copyCode(this,'${escHtml(c[1])}')">📋 复制</button></div><pre>${escHtml(c[1])}</pre></div>`).join('') : ''}
+            ${s.code ? s.code.map((c) => `<div class="code-block"><div class="code-hdr"><span>${c[0]}</span><button class="copy-btn" onclick="copyCode(this,'${escHtml(c[1])}')">${t('copy')}</button></div><pre>${escHtml(c[1])}</pre></div>`).join('') : ''}
             ${s.warning ? `<div class="step-warning">⚠️ ${s.warning}</div>` : ''}
             ${s.tip ? `<div class="step-tip">💡 ${s.tip}</div>` : ''}
           </div>
@@ -8639,7 +9033,7 @@
 
         let prereqHtml = '';
         if (guide.prereq && guide.prereq.length > 0) {
-          prereqHtml = `<div class="gd-prereq"><div class="gd-prereq-title">📋 前置条件</div><ul>${guide.prereq.map((p) => `<li>${p}</li>`).join('')}</ul></div>`;
+          prereqHtml = `<div class="gd-prereq"><div class="gd-prereq-title">${t('prereqTitle')}</div><ul>${guide.prereq.map((p) => `<li>${p}</li>`).join('')}</ul></div>`;
         }
 
         let overviewHtml = '';
@@ -8648,25 +9042,25 @@
         }
 
         detail.innerHTML = `
-    <a class="gd-back" href="#" onclick="showDashboard();return false;">← 返回操作中心</a>
+    <a class="gd-back" href="#" onclick="showDashboard();return false;">${t('back')}</a>
     <div class="gd-hero">
       <div class="gd-hero-top">
         <div class="gd-hero-icon" style="background:${catColor}22">${guide.icon || '📄'}</div>
         <div class="gd-hero-info">
-          <div class="gd-hero-title">${guide.title}</div>
+          <div class="gd-hero-title">${guideTitle(guide)}</div>
           <div class="gd-hero-desc">${guide.desc || ''}</div>
           <div class="gd-hero-meta">
             <span>📂 ${getCategoryLabels()[guide.cat] || guide.cat}</span>
-            <span>📊 ${guide.diff === 'easy' ? '⭐ 简单' : guide.diff === 'medium' ? '⭐⭐ 中等' : '⭐⭐⭐ 高'}</span>
+            <span>📊 ${diffLabel(guide.diff)}</span>
             ${overviewHtml}
           </div>
         </div>
       </div>
     </div>
     <div class="gd-progress">
-      <span>📊 进度</span>
+      <span>${t('progressTitle')}</span>
       <div class="gd-progress-bar"><div class="gd-progress-fill" style="width:${pct}%"></div></div>
-      <span class="gd-progress-text">${stepsDone}/${totalSteps} 步 (${pct}%)</span>
+      <span class="gd-progress-text">${tf('progressText', { done: stepsDone, total: totalSteps, pct: pct })}</span>
     </div>
     ${prereqHtml}
     <div class="gd-steps">${stepsHtml}</div>
@@ -8710,7 +9104,7 @@
           const fill = document.querySelector('.gd-progress-fill');
           const text = document.querySelector('.gd-progress-text');
           if (fill) fill.style.width = pct + '%';
-          if (text) text.textContent = stepsDone + '/' + totalSteps + ' 步 (' + pct + '%)';
+          if (text) text.textContent = tf('progressText', { done: stepsDone, total: totalSteps, pct: pct });
         }
         // Update step visuals
         const step = document.querySelector(`.step[data-step="${n}"]`);
@@ -8728,16 +9122,17 @@
       }
 
       function copyCode(btn, code) {
+        const labelCopied = () => {
+          btn.textContent = t('copied');
+          btn.classList.add('copied');
+          setTimeout(() => {
+            btn.textContent = t('copy');
+            btn.classList.remove('copied');
+          }, 2000);
+        };
         navigator.clipboard
           .writeText(code)
-          .then(() => {
-            btn.textContent = '✅ 已复制';
-            btn.classList.add('copied');
-            setTimeout(() => {
-              btn.textContent = '📋 复制';
-              btn.classList.remove('copied');
-            }, 2000);
-          })
+          .then(labelCopied)
           .catch(() => {
             const ta = document.createElement('textarea');
             ta.value = code;
@@ -8745,12 +9140,7 @@
             ta.select();
             document.execCommand('copy');
             document.body.removeChild(ta);
-            btn.textContent = '✅ 已复制';
-            btn.classList.add('copied');
-            setTimeout(() => {
-              btn.textContent = '📋 复制';
-              btn.classList.remove('copied');
-            }, 2000);
+            labelCopied();
           });
       }
 
@@ -8780,6 +9170,8 @@
 
       /* ═══ Init ═══ */
       function init() {
+        /* 首帧应用语言（含 html lang、静态文案、切换按钮标签） */
+        applyStaticI18n();
         // Start clock
         updateClock();
         setInterval(updateClock, 1000);
