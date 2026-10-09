@@ -97,14 +97,21 @@ c_ok "Pages 部署成功"
 # ── 5. 线上访问验证 ────────────────────────────────────────────────────
 if [ "$DO_VERIFY" -eq 1 ]; then
   c_step "5/5 线上访问验证"
-  REMOTE_FILE="$(curl -fsSL --retry 3 --retry-delay 5 \
-    "${LIVE_URL}?cb=$(date +%s)")"
-  echo "$REMOTE_FILE" | grep -q "^total_skills: $TOTAL$" \
-    || { echo "线上条目数与本地不一致" >&2; exit 1; }
-  REMOTE_IDS="$(echo "$REMOTE_FILE" | sed -n '/^```text$/,/^```$/p' | sed '1d;$d')"
   LOCAL_IDS="$(sed -n '/^```text$/,/^```$/p' "$OUTPUT" | sed '1d;$d')"
-  [ "$REMOTE_IDS" = "$LOCAL_IDS" ] \
-    || { echo "线上 Skill ID 列表与本地不一致" >&2; exit 1; }
+  verified=0
+  for attempt in 1 2 3 4 5; do
+    REMOTE_FILE="$(curl -fsSL --retry 2 --retry-delay 5 \
+      "${LIVE_URL}?cb=$(date +%s)")"
+    REMOTE_IDS="$(echo "$REMOTE_FILE" | sed -n '/^```text$/,/^```$/p' | sed '1d;$d')"
+    if echo "$REMOTE_FILE" | grep -q "^total_skills: $TOTAL$" \
+       && [ "$REMOTE_IDS" = "$LOCAL_IDS" ]; then
+      verified=1
+      break
+    fi
+    c_warn "边缘节点尚未同步，15s 后重试（${attempt}/5）…"
+    sleep 15
+  done
+  [ "$verified" -eq 1 ] || { echo "线上文件多次验证仍不一致" >&2; exit 1; }
   c_ok "线上文件可访问且与本地完全一致（${TOTAL} 项）"
   echo "  $LIVE_URL"
 else
