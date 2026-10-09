@@ -20,7 +20,10 @@ UPSTREAM_URL="https://github.com/NVIDIA/skills.git"
 CACHE_DIR="$ROOT_DIR/.cache/nvidia-skills-upstream"
 OUTPUT="$ROOT_DIR/Skills.md"
 WORKFLOW="pages-deploy.yml"
+SITE_ROOT="https://nvidia-workbench.yyc3.vip/"
 LIVE_URL="https://nvidia-workbench.yyc3.vip/Skills.md"
+# 本脚本管理的全部产物
+MANAGED_FILES=("$OUTPUT" "$ROOT_DIR/DGX-SPARK-HUB-OFFLINE.html" "$ROOT_DIR/index.html")
 
 DO_PUSH=1
 DO_VERIFY=1
@@ -60,12 +63,16 @@ fi
 UPSTREAM_COMMIT="$(git -C "$CACHE_DIR" rev-parse --short HEAD)"
 c_ok "上游版本: $UPSTREAM_COMMIT"
 
-# ── 2. 重建 Skills.md（内含未编排/重复/缺描述校验）────────────────────
-c_step "2/5 重建 Skills.md"
+# ── 2. 重建 Skills.md 与站点 HTML（内含未编排/重复/缺描述校验）─────────
+c_step "2/5 重建 Skills.md 与站点页面数据"
 python3 "$SCRIPT_DIR/build-skills-catalog.py" \
   --upstream "$CACHE_DIR" --output "$OUTPUT"
+python3 "$SCRIPT_DIR/build-skills-html.py" \
+  --upstream "$CACHE_DIR" \
+  --html "$ROOT_DIR/DGX-SPARK-HUB-OFFLINE.html" \
+  --html "$ROOT_DIR/index.html"
 TOTAL="$(sed -n '/^```text$/,/^```$/p' "$OUTPUT" | sed '1d;$d' | grep -c '^[a-z0-9][a-z0-9-]*$')"
-c_ok "机器索引条目数: $TOTAL"
+c_ok "技能总数: $TOTAL"
 
 if [ "$DO_PUSH" -eq 0 ]; then
   c_step "完成（--no-push）"
@@ -77,19 +84,33 @@ fi
 # ── 3. 提交并推送 ──────────────────────────────────────────────────────
 c_step "3/5 提交并推送 main"
 cd "$ROOT_DIR"
-if [ -z "$(git status --porcelain -- "$OUTPUT")" ]; then
-  c_warn "Skills.md 与上游 $UPSTREAM_COMMIT 一致，无变更，跳过提交"
+PUSHED_SHA=""
+if [ -z "$(git status --porcelain -- "${MANAGED_FILES[@]}")" ]; then
+  c_warn "全部产物与上游 $UPSTREAM_COMMIT 一致，无变更，跳过提交"
 else
-  git add "$OUTPUT"
-  git commit -m "chore(skills): 同步上游 @${UPSTREAM_COMMIT}，目录更新至 ${TOTAL} 项"
+  git add "${MANAGED_FILES[@]}"
+  git commit -m "chore(skills): 同步上游 @${UPSTREAM_COMMIT}，技能库更新至 ${TOTAL} 项"
   git_retry git push origin main
-  c_ok "已推送，Pages 部署工作流已触发"
+  PUSHED_SHA="$(git rev-parse HEAD)"
+  c_ok "已推送 ${PUSHED_SHA:0:7}，Pages 部署工作流已触发"
 fi
 
 # ── 4. 等待 Pages 工作流完成 ───────────────────────────────────────────
 c_step "4/5 等待 GitHub Pages 部署完成"
-RUN_ID="$(gh run list --workflow="$WORKFLOW" --branch=main --limit 1 \
-  --json databaseId --jq '.[0].databaseId')"
+RUN_ID=""
+if [ -n "$PUSHED_SHA" ]; then
+  # 精确匹配本次提交；run 注册有延迟，最多等待 60s
+  for _ in 1 2 3 4 5 6; do
+    RUN_ID="$(gh run list --workflow="$WORKFLOW" --commit="$PUSHED_SHA" \
+      --json databaseId --jq '.[0].databaseId' 2>/dev/null)"
+    [ -n "$RUN_ID" ] && break
+    sleep 10
+  done
+else
+  RUN_ID="$(gh run list --workflow="$WORKFLOW" --branch=main --limit 1 \
+    --json databaseId --jq '.[0].databaseId')"
+fi
+[ -n "$RUN_ID" ] || { echo "未找到 Pages 部署工作流运行" >&2; exit 1; }
 c_ok "工作流运行: https://github.com/YYC-Cube/NVIDIA-DGX-Workbench/actions/runs/${RUN_ID}"
 gh run watch "$RUN_ID" --exit-status --interval 10 >/dev/null
 c_ok "Pages 部署成功"
@@ -100,11 +121,15 @@ if [ "$DO_VERIFY" -eq 1 ]; then
   LOCAL_IDS="$(sed -n '/^```text$/,/^```$/p' "$OUTPUT" | sed '1d;$d')"
   verified=0
   for attempt in 1 2 3 4 5; do
+    cb="$(date +%s)"
     REMOTE_FILE="$(curl -fsSL --retry 2 --retry-delay 5 \
-      "${LIVE_URL}?cb=$(date +%s)")"
+      "${LIVE_URL}?cb=${cb}")"
     REMOTE_IDS="$(echo "$REMOTE_FILE" | sed -n '/^```text$/,/^```$/p' | sed '1d;$d')"
+    REMOTE_SITE="$(curl -fsSL --retry 2 --retry-delay 5 \
+      "${SITE_ROOT}?cb=${cb}")"
     if echo "$REMOTE_FILE" | grep -q "^total_skills: $TOTAL$" \
-       && [ "$REMOTE_IDS" = "$LOCAL_IDS" ]; then
+       && [ "$REMOTE_IDS" = "$LOCAL_IDS" ] \
+       && echo "$REMOTE_SITE" | grep -q "order: ${TOTAL},"; then
       verified=1
       break
     fi
@@ -112,8 +137,9 @@ if [ "$DO_VERIFY" -eq 1 ]; then
     sleep 15
   done
   [ "$verified" -eq 1 ] || { echo "线上文件多次验证仍不一致" >&2; exit 1; }
-  c_ok "线上文件可访问且与本地完全一致（${TOTAL} 项）"
+  c_ok "线上 Skills.md 与站点首页均已更新（${TOTAL} 项）"
   echo "  $LIVE_URL"
+  echo "  $SITE_ROOT"
 else
   c_warn "已跳过线上验证（--no-verify）"
 fi
