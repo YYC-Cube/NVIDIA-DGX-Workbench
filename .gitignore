@@ -37,6 +37,10 @@ YYC3-*
 # ── 一键更新脚本的上游克隆缓存 ──
 .cache/
 
+# ── Python 字节码缓存 ──
+__pycache__/
+*.pyc
+
 # ── 本地环境文件 ──
 .env
 .env.local
