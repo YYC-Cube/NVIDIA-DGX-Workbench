@@ -34,6 +34,9 @@ YYC3-*
 *.bak
 *.orig
 
+# ── 一键更新脚本的上游克隆缓存 ──
+.cache/
+
 # ── 本地环境文件 ──
 .env
 .env.local
