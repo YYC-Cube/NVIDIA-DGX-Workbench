@@ -1,0 +1,49 @@
+name: semantic-catalog
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - index.html
+      - NVIDIA-NIM-全量模型-分析报告.md
+      - AI-资源矩阵-统一知识图谱.md
+      - scripts/dump-data.mjs
+      - scripts/build_semantic_catalog.py
+      - .github/workflows/semantic-catalog.yml
+  pull_request:
+    paths:
+      - index.html
+      - NVIDIA-NIM-全量模型-分析报告.md
+      - AI-资源矩阵-统一知识图谱.md
+      - scripts/dump-data.mjs
+      - scripts/build_semantic_catalog.py
+      - .github/workflows/semantic-catalog.yml
+
+jobs:
+  freshness:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Regenerate semantic catalog
+        run: |
+          mkdir -p build
+          node scripts/dump-data.mjs > build/data.json
+          python3 scripts/build_semantic_catalog.py --data build/data.json
+      - name: Validate YAML round-trip
+        run: |
+          pip install pyyaml
+          python3 - <<'EOF'
+          import yaml
+          from pathlib import Path
+          for f in sorted(Path("catalog").glob("*.yaml")):
+              yaml.safe_load(f.read_text(encoding="utf-8"))
+              print("ok", f)
+          EOF
+      - name: Catalog must be committed fresh
+        run: git diff --exit-code catalog/

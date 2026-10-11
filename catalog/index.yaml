@@ -1,0 +1,10 @@
+schema: "dgx-semantic-catalog/v1"
+source:
+  index_html_sha256: "a6355dea4fc5"
+  nim_report_sha256: "c798bc7823b3"
+  resource_graph_sha256: "536b51e6da21"
+counts:
+  guides: 226
+  skills: 401
+  nim_models: 140
+  resources: 196
