@@ -178,6 +178,7 @@ nvidia-workbench/
 - 🎨 **深色/浅色主题**：一键切换，本地持久记忆
 - 🌐 **中英双语界面**：顶栏一键切换，词典完全内联零网络请求，离线环境可用；语言偏好 localStorage 持久化
 - ♿ **无障碍与响应式**：键盘焦点环、`prefers-reduced-motion` 支持、768px/480px 双断点移动端适配
+- 🧬 **语义目录（Semantic Catalog）**：`catalog/*.yaml` 把指南/技能/NIM 模型/资源矩阵结构化为机器可读 YAML（963 条目），`mcp-server/server.py` 暴露 4 个 MCP 检索工具供 PAI 等智能体消费，CI 保证目录与源数据同步（详见 [catalog/README.md](catalog/README.md)）
 
 ---
 

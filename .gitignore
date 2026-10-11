@@ -44,3 +44,4 @@ __pycache__/
 # ── 本地环境文件 ──
 .env
 .env.local
+build/
